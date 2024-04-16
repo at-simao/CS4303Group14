@@ -1,4 +1,5 @@
-class Player extends Body{
+class Player extends Body {
+  // private final float MAX_VELOCITY = 2f;
   
   private float orientation = 0.0;
   
@@ -10,7 +11,7 @@ class Player extends Body{
   public boolean movingForward = false; 
   public boolean turningRight = false;
   public boolean turningLeft = false;
-  public boolean reversing = false;; //these correspond to W, A, S, D / UP LEFT RIGHT DOWN keys.
+  public boolean reversing = false; //these correspond to W, A, S, D / UP LEFT RIGHT DOWN keys.
   
   private color colour;
   
@@ -31,9 +32,18 @@ class Player extends Body{
     updateThrust();
     
     //// update position
-    //print(velocity);
     this.position.y += velocity.y;
     this.position.x += velocity.x;
+
+    // // NOT FINAL: Capping velocity for testing
+    // if (abs(velocity.x) > MAX_VELOCITY) {
+    //   velocity.x = (velocity.x / abs(velocity.x)) * MAX_VELOCITY;
+    // }
+    // if (abs(velocity.y) > MAX_VELOCITY) {
+    //   velocity.y = (velocity.y / abs(velocity.y)) * MAX_VELOCITY;
+    // }
+
+    println(position);
   }
   
   private void updateOrientation(){

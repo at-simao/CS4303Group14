@@ -4,6 +4,8 @@ Player player2;
 Camera camera1;
 Camera camera2;
 
+Map map;
+
 PImage player1Screen = null;
 PImage player2Screen = null;
 
@@ -22,7 +24,9 @@ void setup() {
   camera2 = new Camera(0, 0, 3.0f);
   player1 = new Player(new PVector(0,0), 1);
   player2 = new Player(new PVector(0,0), 2);
-    
+  map = new Map();
+  int numPlanets = (int) random(3, 7);
+  map.generate(numPlanets);
 }
  
 void keyPressed() {
@@ -59,14 +63,49 @@ void drawGrid() { //temporary, can be removed once we have an actual map.
   }
 }
 
+void drawArrows(PVector playerPosition) {
+  PVector arrowDirection = PVector.sub(map.star.getPosition(), playerPosition);
+  drawArrow(playerPosition, arrowDirection, map.star.colour);
+  for (Planet planet : map.planets) {
+    arrowDirection = PVector.sub(planet.getPosition(), playerPosition);
+    drawArrow(playerPosition, arrowDirection, planet.colour);
+  }
+}
+
+void drawArrow(PVector playerPosition, PVector direction, color colour) {
+  float arrowLength = 10; // Length of the arrow from its start point
+  float arrowHeadSize = 5; // Size of the arrow head sides
+  float offsetRadius = 30; // Distance from player position to start the arrow
+
+  // Normalize the direction vector, multiply by the offset to find the base of the arrow
+  PVector normalizedDirection = direction.copy().normalize();
+  PVector basePosition = PVector.add(playerPosition, normalizedDirection.copy().mult(offsetRadius));
+  PVector endPosition = PVector.add(basePosition, normalizedDirection.copy().mult(arrowLength));
+
+  offScreenBuffer.pushMatrix();
+  offScreenBuffer.translate(basePosition.x, basePosition.y);
+  float angle = atan2(direction.y, direction.x);
+  offScreenBuffer.rotate(angle);
+
+  // Draw the arrow shaft (optional, if you want a line leading to the head)
+  offScreenBuffer.stroke(colour); // Red for visibility
+  offScreenBuffer.strokeWeight(2);
+
+  // Draw the arrowhead
+  offScreenBuffer.line(arrowLength, 0, arrowHeadSize, -arrowHeadSize);
+  offScreenBuffer.line(arrowLength, 0, arrowHeadSize, arrowHeadSize);
+  offScreenBuffer.popMatrix();
+}
+
 //Method for updating physics of game-world. Currently updates gravity of players.
 void physicsAndLogicUpdate() {  
-  player1.gravitationalPull(calculateGravityByBody(player1.position, player2.position)); 
+  // player1.gravitationalPull(calculateGravityByBody(player1.position, player2.position)); 
   applyGravityToPlayer(player1);
-  player2.gravitationalPull(calculateGravityByBody(player2.position, player1.position));
+  // player2.gravitationalPull(calculateGravityByBody(player2.position, player1.position));
   applyGravityToPlayer(player2);
   player1.integrate();
   player2.integrate();
+  map.integrate();
 }
 
 void applyGravityToPlayer(Player player){
@@ -120,9 +159,12 @@ PImage playerScreenDraw(PVector playerPosition, Camera cameraForPlayer) {
   cameraForPlayer.begin(playerPosition);
 
   drawGrid();
+  map.draw();
   
   player1.draw();
   player2.draw();
+
+  drawArrows(playerPosition);
   
   cameraForPlayer.end();
   offScreenBuffer.endDraw();
