@@ -2,6 +2,8 @@ class Camera {
   private PVector firstTranslate; //translation to middle of respective player's screen (centre at 1/4 width for P1 and 3/4 width for P2)
   private PVector secondTranslate; //translation to middle of respective player's sprite
   private float zoom = 5.0f; //zoom
+  private float zoomX = 5.0f; //zoom
+  private float zoomY = 5.0f; //zoom
   private PVector position = new PVector(0,0);
   
   
@@ -55,29 +57,23 @@ class Camera {
     return zoom;
   }
   
-  public PVector applyTransformation(PVector worldCoordinates){
-    PVector transformedResult = new PVector(worldCoordinates.x + firstTranslate.x, worldCoordinates.x + firstTranslate.x);
-    transformedResult.mult(zoom);
-    transformedResult.x = transformedResult.x + secondTranslate.x;
-    transformedResult.y = transformedResult.y + secondTranslate.y;
-    return transformedResult;
-    //* getZoom()) + getSecondTranslation());
+  public void setZoom(float x, float y){ //used when scaling is not uniform between y and x.
+    zoomX = x;
+    zoomY = y;
   }
   
-  public boolean notOutOfBoundsDraw(PVector displayCoord){
-    return true;
-    //if(displayCoord.x < (firstTranslate.x - width/4)) { //if P1, maximum left is x = 0. If P2, maximum left is x = width/2
-    //  //print("FAIL");
-    //  return false;
-    //} else if (displayCoord.x > (firstTranslate.x + width/4)){  //if P1, maximum right is x = width/2. If P2, maximum right is x = width
-    //  //print("\nFAIL2" + (firstTranslate.x - width/4));      
-    //  //print("\nFAIL3" + displayCoord.x);      
-    //  //exit();
-    //  return false;
-    //}
-    //print("PASS");
-    //return true;
+  public void setZoom(float x){
+    zoom = x;
   }
+  
+  //public PVector applyTransformation(PVector worldCoordinates){
+  //  PVector transformedResult = new PVector(worldCoordinates.x + firstTranslate.x, worldCoordinates.x + firstTranslate.x);
+  //  transformedResult.mult(zoom);
+  //  transformedResult.x = transformedResult.x + secondTranslate.x;
+  //  transformedResult.y = transformedResult.y + secondTranslate.y;
+  //  return transformedResult;
+  //  //* getZoom()) + getSecondTranslation());
+  //}
   
   
 }

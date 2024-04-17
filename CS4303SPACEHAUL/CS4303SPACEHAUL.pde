@@ -1,13 +1,21 @@
+//DEBUG VARIABLES
+boolean player1ZoomOut = false;
+boolean player2ZoomOut = false;
+final float ZOOM_OUT_VALUE = 0.3;
+//
+
 Player player1;
 Player player2;
 
 Camera camera1;
 Camera camera2;
+final float MAX_ZOOM_OUT = 3;
 
 Map map;
 
 PImage player1Screen = null;
 PImage player2Screen = null;
+
 
 
 static public PGraphics offScreenBuffer; //to refer to the buffer outside of this class, use CS4303SPACEHAUL.offScreenBuffer, use this when performing any draw methods (e.g. CS4303SPACEHAUL.offScreenBuffer.line(...))
@@ -30,27 +38,29 @@ void setup() {
 }
  
 void keyPressed() {
-  // wizard controls
-  if(key == 'w') player1.movingForward = true;
-  if(key == 's') player1.reversing = true;
-  if(key == 'a') player1.turningRight = true;
-  if(key == 'd') player1.turningLeft = true;
-  if(keyCode == UP) player2.movingForward = true;
-  if(keyCode == DOWN) player2.reversing = true;
-  if(keyCode == LEFT) player2.turningRight = true;
-  if(keyCode == RIGHT) player2.turningLeft = true;
+  if(key == 'w' || key == 'W') player1.thrustUp = true;
+  if(key == 's' || key == 'S') player1.thrustDown = true;
+  if(key == 'a' || key == 'A') player1.thrustRight = true;
+  if(key == 'd' || key == 'D') player1.thrustLeft = true;
+  if(keyCode == UP) player2.thrustUp = true;
+  if(keyCode == DOWN) player2.thrustDown = true;
+  if(keyCode == LEFT) player2.thrustRight = true;
+  if(keyCode == RIGHT) player2.thrustLeft = true;
+  if(key == 'Z' || key == 'z') player1ZoomOut = true;
+  if(key == 'X' || key == 'x') player1ZoomOut = false;
+  if(key == 'C' || key == 'c') player2ZoomOut = true;
+  if(key == 'V' || key == 'v') player2ZoomOut = false;
 }
 
 void keyReleased() {
-  // wizard controls
-  if(key == 'w') player1.movingForward = false;
-  if(key == 's') player1.reversing = false;
-  if(key == 'a') player1.turningRight = false;
-  if(key == 'd') player1.turningLeft = false;
-  if(keyCode == UP) player2.movingForward = false;
-  if(keyCode == DOWN) player2.reversing = false;
-  if(keyCode == LEFT) player2.turningRight = false;
-  if(keyCode == RIGHT) player2.turningLeft = false;
+  if(key == 'w' || key == 'W') player1.thrustUp = false;
+  if(key == 's' || key == 'S') player1.thrustDown = false;
+  if(key == 'a' || key == 'A') player1.thrustRight = false;
+  if(key == 'd' || key == 'D') player1.thrustLeft = false;
+  if(keyCode == UP) player2.thrustUp = false;
+  if(keyCode == DOWN) player2.thrustDown = false;
+  if(keyCode == LEFT) player2.thrustRight = false;
+  if(keyCode == RIGHT) player2.thrustLeft = false;
 }
 
 void drawGrid() { //temporary, can be removed once we have an actual map.
@@ -126,7 +136,17 @@ PVector calculateGravityByBody(PVector body1Pos, PVector body2Pos){
 
 void draw() {
   physicsAndLogicUpdate(); //Update physics & positions once. Then display twice, once from player 1's perspective, second from player 2's.
+  if(player1ZoomOut){
+    camera1.setZoom(ZOOM_OUT_VALUE); //debug feature: zoom out to better see solar system. Press Z to activate, and X to deactivate.
+  } else {
+    camera1.setZoom(3 / min((1+0.03*player1.getVelocity().mag()), MAX_ZOOM_OUT)); //zoom out effect to give feeling to player of FTL travel.
+  }
   player1Screen = playerScreenDraw(player1.position, camera1); //write player 1's screen to buffer, outputs to an image.
+  if(player2ZoomOut){
+    camera2.setZoom(ZOOM_OUT_VALUE); //debug feature: zoom out to better see solar system. Press C to activate, and V to deactivate.
+  } else {
+    camera2.setZoom(3 / min((1+0.03*player2.getVelocity().mag()), MAX_ZOOM_OUT)); //zoom out effect to give feeling to player of FTL travel.
+  }
   player2Screen = playerScreenDraw(player2.position, camera2); //write player 1's screen to buffer, outputs to an image.
   //This draws to the screen.
   imageMode(CORNER);
