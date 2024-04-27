@@ -7,15 +7,18 @@ final float ZOOM_OUT_VALUE = 0.3;
 Player player1;
 Player player2;
 
+ArrayList<FriendlyAI> escortAI = new ArrayList<FriendlyAI>(); //arraylist storing all currently active escort-mission friendly ai.
+
 Camera camera1;
 Camera camera2;
 final float MAX_ZOOM_OUT = 3;
 
-Map map;
+static Map map;
 
 PImage player1Screen = null;
 PImage player2Screen = null;
 
+Hazards hazards = new Hazards(); //Hazards class keeps track of all meteors currently rendered and existing. Spawn as player gets near (procedurally), despawn as player moves away.
 
 
 static public PGraphics offScreenBuffer; //to refer to the buffer outside of this class, use CS4303SPACEHAUL.offScreenBuffer, use this when performing any draw methods (e.g. CS4303SPACEHAUL.offScreenBuffer.line(...))
@@ -32,6 +35,10 @@ void setup() {
   camera2 = new Camera(0, 0, 3.0f);
   player1 = new Player(new PVector(0,0), 1);
   player2 = new Player(new PVector(0,0), 2);
+  //TO BE REMOVED
+  escortAI.add(new FriendlyAI(new PVector(0,800))); //NOTE: Placed here for feature testing. In actual game should not spawn immediently, only near escort mission planet. Then when player gets near, the ai follows player.
+  escortAI.get(0).setTarget(player1);
+  //TO BE REMOVED
   map = new Map();
   int numPlanets = (int) random(3, 7);
   map.generate(numPlanets);
@@ -115,24 +122,21 @@ void physicsAndLogicUpdate() {
   applyGravityToPlayer(player2);
   player1.integrate();
   player2.integrate();
+  for(FriendlyAI friend : escortAI){
+    friend.integrate();
+  }
   map.integrate();
+  hazards.generate(player1, player2, 1);
+  hazards.generate(player1, player2, 2);
+  hazards.deleteHazard(player1, player2);
+  hazards.integrate(player1, player2, escortAI);
 }
 
 void applyGravityToPlayer(Player player){
   // in here would be gravity calculations that would be the same for both players e.g. gravity by planets.
 }
 
-//Method for determining strength of gravitational pull from one body to another.
-PVector calculateGravityByBody(PVector body1Pos, PVector body2Pos){
-  PVector gravity = new PVector(body2Pos.x - body1Pos.x, body2Pos.y - body1Pos.y);
-  float distance = gravity.mag();
-  if(distance == 0) {
-    gravity.mult(0); //prevent divide by 0 error
-  } else{
-    gravity.mult(1/distance);
-  }
-  return gravity.copy();
-}
+
 
 void draw() {
   physicsAndLogicUpdate(); //Update physics & positions once. Then display twice, once from player 1's perspective, second from player 2's.
@@ -141,13 +145,13 @@ void draw() {
   } else {
     camera1.setZoom(3 / min((1+0.03*player1.getVelocity().mag()), MAX_ZOOM_OUT)); //zoom out effect to give feeling to player of FTL travel.
   }
-  player1Screen = playerScreenDraw(player1.position, camera1); //write player 1's screen to buffer, outputs to an image.
+  player1Screen = playerScreenDraw(player1, camera1); //write player 1's screen to buffer, outputs to an image.
   if(player2ZoomOut){
     camera2.setZoom(ZOOM_OUT_VALUE); //debug feature: zoom out to better see solar system. Press C to activate, and V to deactivate.
   } else {
     camera2.setZoom(3 / min((1+0.03*player2.getVelocity().mag()), MAX_ZOOM_OUT)); //zoom out effect to give feeling to player of FTL travel.
   }
-  player2Screen = playerScreenDraw(player2.position, camera2); //write player 1's screen to buffer, outputs to an image.
+  player2Screen = playerScreenDraw(player2, camera2); //write player 1's screen to buffer, outputs to an image.
   //This draws to the screen.
   imageMode(CORNER);
   player1Screen.loadPixels();
@@ -166,7 +170,7 @@ void draw() {
 }
 
 //Draws every element in the world, from the current player's perspective. No physics calculations done here.
-PImage playerScreenDraw(PVector playerPosition, Camera cameraForPlayer) {
+PImage playerScreenDraw(Player player, Camera cameraForPlayer) {
   //fill(255);
   offScreenBuffer.beginDraw();
   offScreenBuffer.background(#CECECE);
@@ -176,15 +180,22 @@ PImage playerScreenDraw(PVector playerPosition, Camera cameraForPlayer) {
   offScreenBuffer.imageMode(CENTER);
   offScreenBuffer.textMode(CENTER);
 
-  cameraForPlayer.begin(playerPosition);
+  cameraForPlayer.begin(player.getPosition());
 
   drawGrid();
   map.draw();
   
   player1.draw();
   player2.draw();
-
-  drawArrows(playerPosition);
+  for(FriendlyAI friend : escortAI){
+    friend.draw();
+  }
+  
+  hazards.draw();
+  
+  player.drawImpulseIndicator();
+  drawArrows(player.getPosition());
+  player.drawHealthBar();
   
   cameraForPlayer.end();
   offScreenBuffer.endDraw();

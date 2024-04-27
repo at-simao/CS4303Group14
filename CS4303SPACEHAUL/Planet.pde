@@ -26,6 +26,10 @@ class Planet {
     angle += TWO_PI / period;
     angle %= TWO_PI;
   }
+  
+  public float getDiameter(){
+    return diameter;
+  }
 
   public void draw() {
     CS4303SPACEHAUL.offScreenBuffer.pushMatrix(); // Save the current state of the coordinate system

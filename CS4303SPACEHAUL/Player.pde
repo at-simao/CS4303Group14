@@ -1,11 +1,17 @@
 class Player extends Body {
   // private final float MAX_VELOCITY = 2f;
   
+  private float health = 100;
+  private final float MAX_HEALTH = 100;
+  
   private float orientation = 0.0;
   
   private final float THRUST_INCREMENT = 0.08;
   private final float ORIENTATION_INCREMENT = 0.1;
   private final float SLOW_DOWN = 0.97; //drag applied when player attempts to slow down: this is done when the press thurstLeft and thrustRight at the same time.
+  
+  private final float HYPERSPEED_MIN = 8;
+  private int drawUpTo = 0;
   
   private final float radius = 7;
   
@@ -17,6 +23,8 @@ class Player extends Body {
   
   private color colour;
   
+  private PVector[] trailing = new PVector[10];
+  
   public Player(PVector start, int whichPlayer) {
     super(start, new PVector(0,0), 0.01);
     if(whichPlayer == 1){
@@ -24,9 +32,22 @@ class Player extends Body {
     } else {
       colour = color(0,0,255);
     }
+    for(int i = 0; i < trailing.length; i++){
+      trailing[i] = new PVector(start.x, start.y, orientation); //overloading PVector semantics to store x,y,orientation as 3D vector.
+    }
   }
   
   public void integrate() {
+    if(health == 0){
+      //DESPAWN PLAYER WHEN HEALTH IS 0, RESET.
+    }
+    //shift trailing by 1 to the right
+    PVector temp = trailing[1];
+    trailing[1] = trailing[0];
+    for(int i = trailing.length-1; i > 0; i--){
+      trailing[i] = trailing[i-1];
+    }
+    trailing[0] = new PVector(position.x, position.y, orientation);
     
     updateOrientation(); //defunct currently
     //update thrust (pressing W,A,S,D / UP,LEFT,DOWN,RIGHT)
@@ -58,6 +79,7 @@ class Player extends Body {
       }
       //END OF COPIED CODE
     }
+    
     
     
     //// update position
@@ -104,9 +126,24 @@ class Player extends Body {
   
   public void draw() {
     CS4303SPACEHAUL.offScreenBuffer.noStroke();
-    CS4303SPACEHAUL.offScreenBuffer.fill(colour);
+    if(velocity.mag() > HYPERSPEED_MIN){
+      drawUpTo++;
+      drawUpTo = min(drawUpTo, trailing.length*3);
+    } else {
+      drawUpTo-=2;
+      drawUpTo = max(drawUpTo, 0);
+    }
+    for(int i = 0; i < floor(drawUpTo/3); i++){
+      CS4303SPACEHAUL.offScreenBuffer.fill(255, 255, 255, floor(float(200*(trailing.length-i))/trailing.length));
+      CS4303SPACEHAUL.offScreenBuffer.translate(trailing[i].x, trailing[i].y);
+      CS4303SPACEHAUL.offScreenBuffer.rotate(-trailing[i].z+HALF_PI); //.z == orientation
+      CS4303SPACEHAUL.offScreenBuffer.triangle(-radius, -radius, -radius, radius, radius*2, 0);
+      CS4303SPACEHAUL.offScreenBuffer.rotate(trailing[i].z-HALF_PI); //.z == orientation
+      CS4303SPACEHAUL.offScreenBuffer.translate(-trailing[i].x, -trailing[i].y);
+    }
     CS4303SPACEHAUL.offScreenBuffer.translate(position.x, position.y);
-    drawImpulseIndicator();
+    //draw player sprite
+    CS4303SPACEHAUL.offScreenBuffer.fill(colour);
     CS4303SPACEHAUL.offScreenBuffer.rotate(-orientation+HALF_PI);
     CS4303SPACEHAUL.offScreenBuffer.triangle(-radius, -radius, -radius, radius, radius*2, 0);
     CS4303SPACEHAUL.offScreenBuffer.fill(colour);    
@@ -114,7 +151,17 @@ class Player extends Body {
     CS4303SPACEHAUL.offScreenBuffer.translate(-position.x, -position.y);
   }
   
-  private void drawImpulseIndicator(){ //draws circle in direction of impulse/where player is accelerating.
+  public void drawHealthBar(){
+    CS4303SPACEHAUL.offScreenBuffer.translate(position.x, position.y);
+    CS4303SPACEHAUL.offScreenBuffer.fill(0);
+    CS4303SPACEHAUL.offScreenBuffer.noStroke();
+    CS4303SPACEHAUL.offScreenBuffer.rect(-radius*1.5, radius*2.5, radius*3, radius/2);
+    CS4303SPACEHAUL.offScreenBuffer.fill(0,180,0);
+    CS4303SPACEHAUL.offScreenBuffer.rect(-radius*1.5, radius*2.5, ((radius*3)*health)/MAX_HEALTH, radius/2);
+    CS4303SPACEHAUL.offScreenBuffer.translate(-position.x, -position.y);
+  }
+  
+  public void drawImpulseIndicator(){ //draws circle in direction of impulse/where player is accelerating.
     int upOrDown = 0;
     int leftOrRight = 0;
     if(thrustLeft && thrustRight){
@@ -131,7 +178,23 @@ class Player extends Body {
     }
     PVector placementOfExhaust = new PVector(leftOrRight, upOrDown);
     placementOfExhaust.normalize(); //normalise so impulse indicator is always barely touching front of player.
+    CS4303SPACEHAUL.offScreenBuffer.translate(position.x, position.y);
+    CS4303SPACEHAUL.offScreenBuffer.fill(colour);
     CS4303SPACEHAUL.offScreenBuffer.circle(placementOfExhaust.x*radius*2.25, placementOfExhaust.y*radius*2.25, 4); 
+    CS4303SPACEHAUL.offScreenBuffer.translate(-position.x, -position.y);
 
+  }
+  
+  public void changeHealthBy(float increment){
+    health += increment;
+    health = min(health, MAX_HEALTH);
+  }
+  
+  public float getHealth(){
+    return health;
+  }
+  
+  public float getRadius(){
+    return radius;
   }
 }
