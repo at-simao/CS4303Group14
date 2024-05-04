@@ -3,6 +3,7 @@ class Meteor extends Body{ //small bodies that attract one another and collide w
   private float meteorHeight = 5;
   private float orientation = 0;
   private boolean toRemove = false;
+  private float minimumDistanceForGravity = 200;
   
   
   Meteor(float radius, float invM, PVector pos){
@@ -15,7 +16,9 @@ class Meteor extends Body{ //small bodies that attract one another and collide w
   //Meteors are attracted to all moving bodies, including other meteors. Must calculate respective pull from n^2 combinations.
   public void integratePerMeteor(ArrayList<Meteor> meteors){
     for (Meteor meteor : meteors) {
-      gravitationalPull(meteor);
+      if(position.dist(meteor.getPosition()) < minimumDistanceForGravity){
+        gravitationalPull(meteor);
+      }
     }
   }
   

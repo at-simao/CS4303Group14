@@ -5,6 +5,7 @@ class Camera {
   private float zoomX = 5.0f; //zoom
   private float zoomY = 5.0f; //zoom
   private PVector position = new PVector(0,0);
+  float heightUIOffset;
   
   
   final int CAMERA_FRAME_LAG = 15;
@@ -13,12 +14,13 @@ class Camera {
 
   
   
-  public Camera(int x, int y, float zoom) {
+  public Camera(int x, int y, float zoom, float heightUIOffset) {
     this.firstTranslate = new PVector(x, y);
     this.zoom = zoom;
     for(int i = 0; i < CAMERA_FRAME_LAG; i++){
       frameLagForCamera[i] = new PVector(x,y);
     }
+    this.heightUIOffset = heightUIOffset;
   }
 
   public void begin(PVector position) {
@@ -31,7 +33,7 @@ class Camera {
     CS4303SPACEHAUL.offScreenBuffer.pushMatrix();
     this.position.x = frameLagForCamera[cameraLagIndex].x;
     this.position.y = frameLagForCamera[cameraLagIndex].y;
-    CS4303SPACEHAUL.offScreenBuffer.translate(width/4, height/2);
+    CS4303SPACEHAUL.offScreenBuffer.translate(width/4, height/2-heightUIOffset);
     CS4303SPACEHAUL.offScreenBuffer.scale(zoom);
     secondTranslate = new PVector(-this.position.x, -this.position.y);
     CS4303SPACEHAUL.offScreenBuffer.translate(-this.position.x, -this.position.y);

@@ -164,6 +164,9 @@ class Player extends Body {
   public void drawImpulseIndicator(){ //draws circle in direction of impulse/where player is accelerating.
     int upOrDown = 0;
     int leftOrRight = 0;
+    if(!(thrustLeft || thrustRight || thrustUp || thrustDown)) {
+      return;// no acceleration
+    }
     if(thrustLeft && thrustRight){
       return; //no need to draw, SLOW_DOWN is in effect.
     }if(thrustRight){

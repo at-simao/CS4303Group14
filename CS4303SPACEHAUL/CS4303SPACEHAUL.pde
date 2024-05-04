@@ -2,7 +2,15 @@
 boolean player1ZoomOut = false;
 boolean player2ZoomOut = false;
 final float ZOOM_OUT_VALUE = 0.3;
-//
+// WAVE & SCORE
+static int wave = 1;
+static float score = 0;
+static float scoreNeeded = 1000;
+// UI
+static boolean isPaused = false;
+static boolean newWave = true;
+float heightUIOffset;
+UI ui;
 
 Player player1;
 Player player2;
@@ -29,10 +37,13 @@ void setup() {
   frameRate(120);
   fullScreen();
   noSmooth();
+  heightUIOffset = height*0.1;
+  ui = new UI(heightUIOffset);
+  ui.setNewWaveTimer(1, 5); //DEMO TIMER, this is meant to be changed when we actually implement a wave system.
   
   // set up two cameras, one for each player.
-  camera1 = new Camera(0, 0, 3.0f);
-  camera2 = new Camera(0, 0, 3.0f);
+  camera1 = new Camera(0, 0, 3.0f, heightUIOffset);
+  camera2 = new Camera(0, 0, 3.0f, heightUIOffset);
   player1 = new Player(new PVector(0,0), 1);
   player2 = new Player(new PVector(0,0), 2);
   //TO BE REMOVED
@@ -153,6 +164,7 @@ void draw() {
   }
   player2Screen = playerScreenDraw(player2, camera2); //write player 1's screen to buffer, outputs to an image.
   //This draws to the screen.
+  translate(0, height*0.1);
   imageMode(CORNER);
   player1Screen.loadPixels();
   for (int i = 0; i < width*height; i++) {
@@ -165,7 +177,11 @@ void draw() {
   image(player1Screen, 0, 0);
   imageMode(CENTER);
   noStroke();
+  translate(0, -height*0.1);
+  fill(255);
+  stroke(0);
   rect(width*0.495, 0, width*0.01, height);
+  ui.draw();
   //end of draw to screen.
 }
 
