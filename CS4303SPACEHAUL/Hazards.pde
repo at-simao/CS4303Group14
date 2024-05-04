@@ -2,7 +2,9 @@ class Hazards { //Maintains all hazards on map and handles collision logic for e
   
   private float ELASTICITY = 0.5; //how much kinetic energy remains in colliding meteor, and how much is transferred to hit meteor (1-ELASTICITY).
   
-  private int MAX_METEORS = 100;
+  private float FRICTION = 0.1;
+  
+  private int MAX_METEORS = 40;
   
   private float chanceOfNewMeteor = 0.96; //note that this probability is twice as high as current value, as attempt to generate meteors twice per frame.
   
@@ -171,11 +173,11 @@ class Hazards { //Maintains all hazards on map and handles collision logic for e
     incidentVelocity = m1.getVelocity().copy().normalize();
     float oldSpeedM1 = m1.getVelocity().mag();
     PVector m1Reflection = returnReflectionVector(incidentVelocity, normalOfCollision.mult(-1));
-    m1Reflection.mult(oldSpeedM1*ELASTICITY); //perfect reflection of m1's movement
-    m2Reflection.mult(oldSpeedM2*ELASTICITY); //perfect reflection of m2's movement
+    m1Reflection.mult(oldSpeedM1*(ELASTICITY-FRICTION)); //perfect reflection of m1's movement
+    m2Reflection.mult(oldSpeedM2*(ELASTICITY-FRICTION)); //perfect reflection of m2's movement
     
-    PVector transferredEnergyFromM2 = normalOfCollision.copy().mult(oldSpeedM2*(1-ELASTICITY));
-    PVector transferredEnergyFromM1 = normalOfCollision.mult(-1).mult(oldSpeedM1*(1-ELASTICITY));
+    PVector transferredEnergyFromM2 = normalOfCollision.copy().mult(oldSpeedM2*(1-(ELASTICITY - FRICTION)));
+    PVector transferredEnergyFromM1 = normalOfCollision.mult(-1).mult(oldSpeedM1*(1-ELASTICITY - FRICTION));
     
     
     m1Reflection.x += transferredEnergyFromM2.x;
@@ -185,6 +187,26 @@ class Hazards { //Maintains all hazards on map and handles collision logic for e
     
     m1.setVelocity(m1Reflection.copy());
     m2.setVelocity(m2Reflection.copy());
+    int clockWiseOrNot = -1; //by default clockwise
+    if(m1.getPosition().x < m2.getPosition().x){
+      if(m2.getVelocity().y < 0 && abs(m2.getVelocity().y) > abs(m2.getVelocity().x)) {
+        clockWiseOrNot = 1;
+      } else if(m2.getVelocity().y >= 0 && abs(m2.getVelocity().y) <= abs(m2.getVelocity().x)) {
+        clockWiseOrNot = 1;
+      }
+    } else {
+      if(m2.getVelocity().y >= 0 && abs(m2.getVelocity().y) > abs(m2.getVelocity().x)) {
+        clockWiseOrNot = 1;
+      } else if(m2.getVelocity().y < 0 && abs(m2.getVelocity().y) <= abs(m2.getVelocity().x)) {
+        clockWiseOrNot = 1;
+      }
+    }
+    if(m2.getVelocity().mag() > 0.1){
+      m1.changeAngularMomentum(FRICTION*oldSpeedM2*clockWiseOrNot);
+    }
+    if(m1.getVelocity().mag() > 0.1){
+      m2.changeAngularMomentum(FRICTION*oldSpeedM1*-clockWiseOrNot);
+    }
   }
   
   private PVector returnReflectionVector(PVector incidence, PVector normal){

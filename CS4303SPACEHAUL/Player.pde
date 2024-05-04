@@ -25,6 +25,8 @@ class Player extends Body {
   
   private PVector[] trailing = new PVector[10];
   
+  private Timer respawnTimer = null;
+  
   public Player(PVector start, int whichPlayer) {
     super(start, new PVector(0,0), 0.01);
     if(whichPlayer == 1){
@@ -37,11 +39,25 @@ class Player extends Body {
     }
   }
   
-  public void integrate() {
-    if(health == 0){
+  public void updateRespawnTimer(){
+    if(health <= 0 && respawnTimer == null){
+      health = 0;
       //DESPAWN PLAYER WHEN HEALTH IS 0, RESET.
+      respawnTimer = new Timer(15000, position, radius*2.5, color(100), color(180));
+      velocity.setMag(0);
+      return;
     }
+    if(respawnTimer != null){
+      respawnTimer.updateTimer();
+      return;
+    }
+  }
+  
+  public void integrate() {
     //shift trailing by 1 to the right
+    if(respawnTimer != null){
+      return; //no movement allowed until timer is spent.
+    }
     PVector temp = trailing[1];
     trailing[1] = trailing[0];
     for(int i = trailing.length-1; i > 0; i--){
@@ -126,6 +142,15 @@ class Player extends Body {
   
   public void draw() {
     CS4303SPACEHAUL.offScreenBuffer.noStroke();
+    if(respawnTimer != null){
+      if(respawnTimer.outOfTime()){
+        respawnTimer = null;
+        health = MAX_HEALTH;
+        return;
+      }
+      respawnTimer.draw();
+      return;
+    }
     if(velocity.mag() > HYPERSPEED_MIN){
       drawUpTo++;
       drawUpTo = min(drawUpTo, trailing.length*3);
@@ -191,6 +216,7 @@ class Player extends Body {
   public void changeHealthBy(float increment){
     health += increment;
     health = min(health, MAX_HEALTH);
+    health = max(health, 0);
   }
   
   public float getHealth(){

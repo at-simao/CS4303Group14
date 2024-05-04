@@ -4,11 +4,11 @@ boolean player2ZoomOut = false;
 final float ZOOM_OUT_VALUE = 0.3;
 // WAVE & SCORE
 static int wave = 1;
-static float score = 0;
+static float score = 0.0;
 static float scoreNeeded = 1000;
 // UI
 static boolean isPaused = false;
-static boolean newWave = true;
+static boolean newWave = false;
 float heightUIOffset;
 UI ui;
 
@@ -37,7 +37,7 @@ void setup() {
   frameRate(120);
   fullScreen();
   noSmooth();
-  heightUIOffset = height*0.1;
+  heightUIOffset = height*0.15;
   ui = new UI(heightUIOffset);
   ui.setNewWaveTimer(1, 5); //DEMO TIMER, this is meant to be changed when we actually implement a wave system.
   
@@ -47,8 +47,8 @@ void setup() {
   player1 = new Player(new PVector(0,0), 1);
   player2 = new Player(new PVector(0,0), 2);
   //TO BE REMOVED
-  escortAI.add(new FriendlyAI(new PVector(0,800))); //NOTE: Placed here for feature testing. In actual game should not spawn immediently, only near escort mission planet. Then when player gets near, the ai follows player.
-  escortAI.get(0).setTarget(player1);
+  escortAI.add(new FriendlyAI(new PVector(0,-3000))); //NOTE: Placed here for feature testing. In actual game should not spawn immediently, only near escort mission planet. Then when player gets near, the ai follows player.
+  //escortAI.get(0).setTarget(player1);
   //TO BE REMOVED
   map = new Map();
   int numPlanets = (int) random(3, 7);
@@ -56,6 +56,10 @@ void setup() {
 }
  
 void keyPressed() {
+  if(key == ' '){
+    isPaused = !isPaused;
+    return;
+  } 
   if(key == 'w' || key == 'W') player1.thrustUp = true;
   if(key == 's' || key == 'S') player1.thrustDown = true;
   if(key == 'a' || key == 'A') player1.thrustRight = true;
@@ -141,6 +145,7 @@ void physicsAndLogicUpdate() {
   hazards.generate(player1, player2, 2);
   hazards.deleteHazard(player1, player2);
   hazards.integrate(player1, player2, escortAI);
+  friendlyAILogicUpdate();
 }
 
 void applyGravityToPlayer(Player player){
@@ -150,37 +155,41 @@ void applyGravityToPlayer(Player player){
 
 
 void draw() {
-  physicsAndLogicUpdate(); //Update physics & positions once. Then display twice, once from player 1's perspective, second from player 2's.
-  if(player1ZoomOut){
-    camera1.setZoom(ZOOM_OUT_VALUE); //debug feature: zoom out to better see solar system. Press Z to activate, and X to deactivate.
-  } else {
-    camera1.setZoom(3 / min((1+0.03*player1.getVelocity().mag()), MAX_ZOOM_OUT)); //zoom out effect to give feeling to player of FTL travel.
-  }
-  player1Screen = playerScreenDraw(player1, camera1); //write player 1's screen to buffer, outputs to an image.
-  if(player2ZoomOut){
-    camera2.setZoom(ZOOM_OUT_VALUE); //debug feature: zoom out to better see solar system. Press C to activate, and V to deactivate.
-  } else {
-    camera2.setZoom(3 / min((1+0.03*player2.getVelocity().mag()), MAX_ZOOM_OUT)); //zoom out effect to give feeling to player of FTL travel.
-  }
-  player2Screen = playerScreenDraw(player2, camera2); //write player 1's screen to buffer, outputs to an image.
-  //This draws to the screen.
-  translate(0, height*0.1);
-  imageMode(CORNER);
-  player1Screen.loadPixels();
-  for (int i = 0; i < width*height; i++) {
-    if(i % width == 0){
-      i += width/2; //right-half of screen
+  if(!isPaused) {
+    physicsAndLogicUpdate(); //Update physics & positions once. Then display twice, once from player 1's perspective, second from player 2's.
+    if(player1ZoomOut){
+      camera1.setZoom(ZOOM_OUT_VALUE); //debug feature: zoom out to better see solar system. Press Z to activate, and X to deactivate.
+    } else {
+      camera1.setZoom(3 / min((1+0.03*player1.getVelocity().mag()), MAX_ZOOM_OUT)); //zoom out effect to give feeling to player of FTL travel.
     }
-    player1Screen.pixels[i] = player2Screen.pixels[i - width/2]; //left-half is player 1's screen, right-half is player 2's.
+    player1Screen = playerScreenDraw(player1, camera1); //write player 1's screen to buffer, outputs to an image.
+    if(player2ZoomOut){
+      camera2.setZoom(ZOOM_OUT_VALUE); //debug feature: zoom out to better see solar system. Press C to activate, and V to deactivate.
+    } else {
+      camera2.setZoom(3 / min((1+0.03*player2.getVelocity().mag()), MAX_ZOOM_OUT)); //zoom out effect to give feeling to player of FTL travel.
+    }
+    player2Screen = playerScreenDraw(player2, camera2); //write player 1's screen to buffer, outputs to an image.
+    //This draws to the screen.
+    translate(0, heightUIOffset);
+    imageMode(CORNER);
+    player1Screen.loadPixels();
+    for (int i = 0; i < width*height; i++) {
+      if(i % width == 0){
+        i += width/2; //right-half of screen
+      }
+      player1Screen.pixels[i] = player2Screen.pixels[i - width/2]; //left-half is player 1's screen, right-half is player 2's.
+    }
+    player1Screen.updatePixels();
+    image(player1Screen, 0, 0);
+    imageMode(CENTER);
+    noStroke();
+    translate(0, -heightUIOffset);
+    fill(255);
+    stroke(0);
+    rect(width*0.495, 0, width*0.01, height);  
   }
-  player1Screen.updatePixels();
-  image(player1Screen, 0, 0);
-  imageMode(CENTER);
-  noStroke();
-  translate(0, -height*0.1);
-  fill(255);
-  stroke(0);
-  rect(width*0.495, 0, width*0.01, height);
+  player1.updateRespawnTimer(); //update timer is logic but is an exception. because we must compare the timer every frame, we cannot wait to compare it only after the player unpauses.
+  player2.updateRespawnTimer();
   ui.draw();
   //end of draw to screen.
 }
@@ -216,4 +225,47 @@ PImage playerScreenDraw(Player player, Camera cameraForPlayer) {
   cameraForPlayer.end();
   offScreenBuffer.endDraw();
   return offScreenBuffer.get(); //returns this player's half of the screen as an image.
+}
+
+private void despawnDeadAI(){
+  for(int i = 0; i < escortAI.size(); i++){
+    if(escortAI.get(i).getHealth() <= 0){
+      escortAI.remove(i);
+      i--;
+    }
+  }
+}
+
+private void friendlyAILogicUpdate(){
+  for(int i = 0; i < escortAI.size(); i++){
+    if(escortAI.get(i).getHealth() <= 0){
+      escortAI.remove(i);
+      i--; //despawn dead AI.
+      continue;
+    }
+    if(!escortAI.get(i).hasATarget()){
+      boolean result = lineOfSight(escortAI.get(i), player1);
+      if(!result){ //if no line of sight to player 1, check for player 2
+        lineOfSight(escortAI.get(i), player2);
+      }
+    }
+  }
+}
+
+private boolean lineOfSight(FriendlyAI ai, Player player){
+  PVector lineToPlayer = player.getPosition().copy().sub(ai.getPosition()).normalize();
+  while(lineToPlayer.mag() < ai.getVisibilityRadius()){
+    float oldMag = lineToPlayer.mag();
+    lineToPlayer.normalize().mult(oldMag + ai.getRadius()*0.5); //incrementally raise ray of sight until we hit our target.
+    for(Planet planet : map.planets){
+      if(lineToPlayer.dist(planet.getPosition()) < planet.getDiameter()/2){
+        return false; //planet in the way of line of sight.
+      }
+      if(lineToPlayer.dist(player.getPosition()) < player.getRadius()*2){
+        ai.setTarget(player);
+        return true; //found player
+      }
+    }
+  }
+  return false; //if here then line drawn was beyond visibility radius, failed.
 }

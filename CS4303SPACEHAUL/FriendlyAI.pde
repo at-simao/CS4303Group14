@@ -8,7 +8,6 @@ class FriendlyAI extends Body { //Similar to Player except follows steering algo
   
   private final float SLOW_DOWN = 0.7; //drag
   
-  
   private final float radius = 4;
   
   private color colour;
@@ -19,6 +18,7 @@ class FriendlyAI extends Body { //Similar to Player except follows steering algo
   
   private Body targetPlanet = null; //variable used to determine when escort reaches destination. currently unused.
 
+  private float visibilityRadius = radius*8;
   
   public FriendlyAI(PVector start) {
     super(start, new PVector(0,0), 0.01);
@@ -154,5 +154,13 @@ class FriendlyAI extends Body { //Similar to Player except follows steering algo
   
   public float getRadius(){
     return radius;
+  }
+  
+  public float getVisibilityRadius(){
+    return visibilityRadius;
+  }
+  
+  public boolean hasATarget(){
+    return (target != null);
   }
 }
