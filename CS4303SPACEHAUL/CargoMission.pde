@@ -3,7 +3,7 @@ class CargoMission extends Mission {
 
   //Setting mission planets
 
-    public CargoMission(ArrayList<Planet> pickup, Planet delivery) {
+    public CargoMission(ArrayList<Planet> pickup, ArrayList<Planet> delivery) {
       super(pickup, delivery, true);
       cargoToDeliver = new ArrayList<>();
       calculateScore(true);
@@ -15,18 +15,18 @@ class CargoMission extends Mission {
           if (player.getPosition().dist(pickupPlanet.getPosition()) < pickupPlanet.getDiameter()) {
             player.setCargo(pickupPlanet);
             pickupPlanets.remove(pickupPlanet);
+            updateUi(pickupPlanet.getColour());
             cargoToDeliver.add(pickupPlanet);
             if(!pickupPlanets.contains(pickupPlanet)){
-              pickupPlanet.setMissionPlanet(false);
-              // death will need to reset
+              missionManager.updatePickupZone(pickupPlanet);
             }
             return true;
           }
         }
       }
       else{
-        if (player.getPosition().dist(destinationPlanet.getPosition()) < destinationPlanet.getDiameter()) {
-          ui.updateCargo(player.getCargo().getColour());
+        if (player.getPosition().dist(destinationPlanets.get(0).getPosition()) < destinationPlanets.get(0).getDiameter()) {
+          updateUi(getFadedColour(player.getCargo().getColour()));
           cargoToDeliver.remove(player.getCargo());
           player.setCargo(null);
           checkComplete();
@@ -37,8 +37,8 @@ class CargoMission extends Mission {
     
     void checkComplete() {
       if(pickupPlanets.isEmpty() && cargoToDeliver.isEmpty()){
-        isCompleted = true;
-        destinationPlanet.setMissionPlanet(false);  
+        isCompleted = true; 
+        missionManager.updatePickupZone(destinationPlanets.get(0));
         // other stuff
       }
       
@@ -50,10 +50,10 @@ class CargoMission extends Mission {
       if (!player1.hasCargo()) {
         super.update();
       }
-      if (player1.hasCargo() && player1.getPosition().dist(destinationPlanet.getPosition()) < destinationPlanet.getDiameter()) {
+      if (player1.hasCargo() && player1.getPosition().dist(destinationPlanets.get(0).getPosition()) < destinationPlanets.get(0).getDiameter()) {
         promptInteraction(player1);  
       }
-      if (player2.hasCargo() && player2.getPosition().dist(destinationPlanet.getPosition()) < destinationPlanet.getDiameter()) {
+      if (player2.hasCargo() && player2.getPosition().dist(destinationPlanets.get(0).getPosition()) < destinationPlanets.get(0).getDiameter()) {
         promptInteraction(player2);
       }           //<>//
     }

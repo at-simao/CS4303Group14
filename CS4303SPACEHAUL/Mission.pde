@@ -1,23 +1,51 @@
 static int lastMissionId = 0;
 
 abstract class Mission {
-    protected boolean isCompleted = false;
-    protected ArrayList<Planet> pickupPlanets;
-    protected Planet destinationPlanet;
+  protected boolean isCompleted = false;
+  protected ArrayList<Planet> pickupPlanets;
+  protected ArrayList<Planet> destinationPlanets;
+  protected ArrayList<Integer> uiPlanets;
+  protected ArrayList<Integer> uiDPlanets;
     // Method to update mission status
-    private int score;
-    private boolean type;
-    private int id;
+  private int score;
+  private boolean type;
+  private int id;
    
-    public Mission(ArrayList<Planet> originPlanets, Planet targetPlanet, boolean missionType) {
-      destinationPlanet = targetPlanet;
-      pickupPlanets = originPlanets;
-      destinationPlanet.setMissionPlanet(true);
-      this.id = ++lastMissionId;
-      type = missionType;
-      for(Planet planet : pickupPlanets) {
-        planet.setMissionPlanet(true);
+  public Mission(ArrayList<Planet> originPlanets, ArrayList<Planet> targetPlanets, boolean missionType) {
+    destinationPlanets = targetPlanets;
+    pickupPlanets = originPlanets;
+    uiPlanets = new ArrayList<Integer>();
+    uiDPlanets = new ArrayList<Integer>();
+    for(Planet planet : destinationPlanets) {
+      planet.setMissionPlanet(true);
+      uiDPlanets.add(planet.getColour());
+    }
+    this.id = ++lastMissionId;
+    type = missionType;
+    for(Planet planet : pickupPlanets) {
+      planet.setMissionPlanet(true);
+      uiPlanets.add(planet.getColour());
+    }
+  }
+    
+  protected void updateUi(color colour) {
+    for(int i = 0;i < uiPlanets.size(); i++) {  
+      if(uiPlanets.get(i) == colour) {
+        uiPlanets.set(i, getFadedColour(colour));
+        return;
       }
+    }
+  }
+    
+  protected color getFadedColour(color originalColour) {
+    float r = red(originalColour) * 0.65;
+    float g = green(originalColour) * 0.65;
+    float b = blue(originalColour) * 0.65;
+    return color(r, g, b);
+  }  
+    
+    public boolean containsPlanet(Planet planet) {
+      return pickupPlanets.contains(planet) || destinationPlanets.contains(planet);
     }
     
     public int getId() {
@@ -28,6 +56,12 @@ abstract class Mission {
       return type;
     }
     
+    public ArrayList<Integer> getUiPlanets() {
+      return uiPlanets;
+    }
+     public ArrayList<Integer> getUiDPlanets() {
+      return uiDPlanets;
+    }
     public void update(){
       for(Planet planet : pickupPlanets) {
         if (player1.getPosition().dist(planet.getPosition()) < planet.getDiameter()) {
@@ -43,8 +77,8 @@ abstract class Mission {
       return pickupPlanets;
     }
     
-    public Planet getDestinationPlanet() {
-      return destinationPlanet;
+    public ArrayList<Planet> getDestinationPlanets() {
+      return destinationPlanets;
     }
 
     protected void promptInteraction(Player player) {
@@ -68,23 +102,23 @@ abstract class Mission {
     }
         
     
-    protected void calculateScore(boolean isCargoMission) {
-        int distance = 0;
-        if(isCargoMission) {
-          for (Planet planet : pickupPlanets) {
-            distance += map.planets.indexOf(planet);
-          }
+  protected void calculateScore(boolean isCargoMission) {
+    int distance = 0;
+    if(isCargoMission) {
+      for (Planet planet : pickupPlanets) {
+        distance += map.planets.indexOf(planet);
         }
-        else {
-          distance = map.planets.indexOf(pickupPlanets.get(0));
-        }
-        float missionMulti = isCargoMission ? 1 : 1.25; 
-        int scorePerPlanet = 100; // Score per planet involved
-        int planetScore = isCargoMission ? scorePerPlanet * pickupPlanets.size() : scorePerPlanet;
-        int distanceScore = (int)(distance * 50); 
-    
-        int totalScore = (int)(100 + planetScore + distanceScore * missionMulti);
-        
-        score= floor(CS4303SPACEHAUL.scoreMultiplier(totalScore));
     }
+    else {
+      distance = map.planets.indexOf(pickupPlanets.get(0));
+    }
+    float missionMulti = isCargoMission ? 1 : 1.25; 
+    int scorePerPlanet = 100; // Score per planet involved
+    int planetScore = isCargoMission ? scorePerPlanet * pickupPlanets.size() : scorePerPlanet;
+    int distanceScore = (int)(distance * 50); 
+    
+    int totalScore = (int)(100 + planetScore + distanceScore * missionMulti);
+        
+    score= floor(CS4303SPACEHAUL.scoreMultiplier(totalScore));
+  }
 }

@@ -1,46 +1,13 @@
 class UI{
   private float heightUIOffset = 0;
   private Timer timer;
-  private Timer newWaveMessageTimer;
-  private color  destinationPlanetColour;
-  private ArrayList<Integer> pickupPlanetColours;
-  private ArrayList<Integer> planetOutlines;
-  private boolean missionType = true;  //true for cargo false for escort
   private float lastTargetScore = 0;
-
+  private Timer newWaveMessageTimer;
   UI(float heightUIOffset){
     this.heightUIOffset = heightUIOffset;
     timer = new Timer(60000, new PVector(width*0.5,heightUIOffset*0.5), 35);
-    newWaveMessageTimer = new Timer(1500, new PVector(width*0.5,heightUIOffset*0.5), 35);
-    pickupPlanetColours = new ArrayList<Integer>();
-    planetOutlines = new ArrayList<Integer>();
   }
-
-  //public void removeMissionDisplay(int id) {
-  //  missionDisplays.removeIf(mission -> mission.id == id);
-  //}
-  //public void setMissionColours(ArrayList<Planet> pickupPlanets, color destinationColour, boolean type, int id) {
-  //  removeMissionDisplay(id);  // Remove existing display with the same ID if it exists
-  //  missionDisplays.add(new MissionDisplay(pickupPlanets, destinationColour, type, id));
-  //}
   
-  // Change colour for mission indicator to show delivered
-  public color getFadedColor(color originalColor) {
-    // Slightly fade colour 
-    float r = red(originalColor) * 0.8;
-    float g = green(originalColor) * 0.8;
-    float b = blue(originalColor) * 0.8;
-    return color(r, g, b);
-  }
-
-  // Update delivered missions
-  public void updateCargo(color colour) {
-    int index = pickupPlanetColours.indexOf(Integer.valueOf((int)colour)); // Find the index of the original colour to keep ordering same
-    if (index != -1) {
-        pickupPlanetColours.remove(index); // Remove the original colour at that index
-        pickupPlanetColours.add(index, Integer.valueOf((int)getFadedColor(colour))); // Add the faded colour at the same index
-    }
-  }
   void draw() {
     fill(0);
     noStroke();
@@ -48,22 +15,31 @@ class UI{
     float xStart = 0.01 * width;
     float yStart = heightUIOffset - 10;
     float spacingY = heightUIOffset / 3; // 
-    if(CS4303SPACEHAUL.restartAnimationFlag){
-      return;
-    }
+   
     for (Mission mission : missionManager.getActiveMissions()) {
       String typeText = mission.getType() ? "CARGO" : "ESCORT";
       fill(250);
       textSize(heightUIOffset / 4 - 10);
       textAlign(LEFT);
       text(typeText, xStart, yStart);
-
-      ArrayList<Planet> pickupPlanets = mission.getPickupPlanets();
+      if(CS4303SPACEHAUL.restartAnimationFlag){
+        return;
+      }
+      ArrayList<Integer> pickupPlanets = mission.getUiPlanets();
+      ArrayList<Integer> destinationPlanets = mission.getUiDPlanets();
       float x = xStart + textWidth(typeText) + 20;
 
-      for (Planet planet : pickupPlanets) {
-        fill(planet.getColour());
-        stroke(255);
+      for (Integer planet : pickupPlanets) {
+        fill(planet);
+        ellipse(x, yStart - textAscent() / 2, heightUIOffset * 0.2, heightUIOffset * 0.2); // 
+        x += heightUIOffset * 0.2; // Space between planets
+      }
+      fill(250);
+      String deliverText = "DELIVER TO";
+      text(deliverText, x, yStart);
+      x += textWidth(deliverText) + 20;
+      for (Integer planet : destinationPlanets) {
+        fill(planet);
         ellipse(x, yStart - textAscent() / 2, heightUIOffset * 0.2, heightUIOffset * 0.2); // 
         x += heightUIOffset * 0.2; // Space between planets
       }
@@ -126,7 +102,6 @@ class UI{
     if(!CS4303SPACEHAUL.restartAnimationFlag){
       timer.updateTimer();
     }
-    //timer.draw();
   }
   
   public Timer getTimer(){

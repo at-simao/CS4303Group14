@@ -27,7 +27,7 @@ class MissionManager {
     Iterator<Mission> it = activeMissions.iterator();
     while (it.hasNext()) {  
       Mission mission = it.next();
-      if(mission.attemptAction(player)){return;};
+      if(mission.attemptAction(player)){ System.out.println("EAA10");return;};
     }
   }
 
@@ -35,6 +35,15 @@ class MissionManager {
   public void addMission(Mission mission) {
     activeMissions.add(mission);
 
+  }
+
+  public void updatePickupZone(Planet planet) {
+    for(Mission mission : activeMissions) {
+      if(mission.containsPlanet(planet)){
+        return;
+      }
+    }
+    planet.setMissionPlanet(false);
   }
 
   // Could be called every game tick or based on certain events

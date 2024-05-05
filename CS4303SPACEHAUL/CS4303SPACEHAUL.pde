@@ -60,8 +60,10 @@ void setup() {
   
   // temp first mission
   ArrayList<Planet> randomPlanets = new ArrayList<Planet>();
+  ArrayList<Planet> randomPlanets2 = new ArrayList<Planet>();
   randomPlanets.add(map.planets.get(1));
-  missionManager.addMission(new CargoMission(randomPlanets, map.planets.get(0)));
+  randomPlanets2.add(map.planets.get(0));
+  missionManager.addMission(new CargoMission(randomPlanets, randomPlanets2));
   
 }
  
@@ -165,7 +167,6 @@ void physicsAndLogicUpdate() {
   hazards.deleteHazard(player1, player2);
   hazards.integrate(player1, player2, aiList);
   friendlyAILogicUpdate();
-  updateMission();
 }
 
 void applyGravityToPlayer(Player player){
@@ -235,6 +236,7 @@ void draw() {
   if(!isPaused && !gameOver) {
     physicsAndLogicUpdate(); //Update physics & positions once. Then display twice, once from player 1's perspective, second from player 2's.
     drawUpdate();
+    updateMission();
   }
   player1.updateRespawnTimer(); //update timer is logic but is an exception. because we must compare the timer every frame, we cannot wait to compare it only after the player unpauses.
   player2.updateRespawnTimer();
@@ -244,23 +246,37 @@ void draw() {
 
 void updateMission() {
   missionManager.updateMissions();
-  //System.out.println(currentMission.isCompleted());
   if(missionManager.checkForNewMission()) {
     boolean missionType = (random(0,1) > 0.5);
     ArrayList<Planet> randomPlanets = new ArrayList<Planet>();
     int numPlanets = (int) random(1, 5);
-    for(int i = 0; i < numPlanets; i++) {
-      randomPlanets.add(map.planets.get((int)random(1,map.planets.size())));
+    ArrayList<Planet> destinationPlanets = new ArrayList<Planet>();
+    
+    if(!missionType) {
+      for(int i = 0; i < numPlanets; i++) {
+        randomPlanets.add(map.planets.get((int)random(0,map.planets.size())));
+      }
+      for(int i = 0; i < numPlanets; i++) {
+        destinationPlanets.add(map.planets.get((int)random(0,map.planets.size())));
+        while(destinationPlanets.get(i) == randomPlanets.get(i)) {
+          destinationPlanets.set(i, map.planets.get((int) random(0, map.planets.size())));
+        }
+      }
+      
+    } 
+    else {
+      for(int i = 0; i < numPlanets; i++) {
+        randomPlanets.add(map.planets.get((int)random(1,map.planets.size())));
+      }
+      destinationPlanets.add(map.planets.get(0));
     }
-
-
-    int destinationIndex = 0;
+    
     
     if(missionType) {
-      missionManager.addMission(new CargoMission(randomPlanets, map.planets.get(destinationIndex)));
+      missionManager.addMission(new CargoMission(randomPlanets, destinationPlanets));
     }
     else {
-      missionManager.addMission(new EscortMission(randomPlanets, map.planets.get(destinationIndex)));
+      missionManager.addMission(new EscortMission(randomPlanets, destinationPlanets));
     }
   }
 }
@@ -366,8 +382,10 @@ public void resetFromGameOver(){ //MIGHT NEED TO BE EDITED - some temp code incl
   
   // temp first mission
   ArrayList<Planet> randomPlanets = new ArrayList<Planet>();
+  ArrayList<Planet> randomPlanets2 = new ArrayList<Planet>();
   randomPlanets.add(map.planets.get(1));
-  missionManager.addMission(new CargoMission(randomPlanets, map.planets.get(0)));
+  randomPlanets2.add(map.planets.get(0));
+  missionManager.addMission(new CargoMission(randomPlanets, randomPlanets2));
   
 }
 

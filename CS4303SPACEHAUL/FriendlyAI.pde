@@ -13,35 +13,48 @@ class FriendlyAI extends Body { //Similar to Player except follows steering algo
   private final float maxAcc = 3; //defined in proportion to speed. 
   private PVector wanderTarget;
   private boolean isLost = false;
-  private Planet targetPlanet;
+ // private Planet targetPlanet;  //rework
+  private boolean seekPlanet = false;
+  private Planet destination;
   private boolean arrived;
   private float visibilityRadius = radius*8;
-  public FriendlyAI(PVector start, color planetColour) {
+  
+  public FriendlyAI(PVector start, Planet goal) {
     super(start, new PVector(0,0), 0.01);
-    colour = planetColour;
+    colour = goal.getColour();
+    destination = goal;
+  }
+  
+  public Planet getDestination() {
+    return destination;
   }
   
   //Establishes player as target to trail behind.
   public void setTarget(Player player){
-    FriendlyAI otherAI = player.getAIBehindPlayer();
+    System.out.println("fa2");
+    FriendlyAI otherAI = player.getAIBehindPlayer(); System.out.println("fa1");
     if(otherAI != null){
       //follow trail of AI behind player.
       //println("IN WHILE LOOP" + frameCount);
+      System.out.println("fa3");
       while(true){
-        if(otherAI.getAIBehind() != null){
-          otherAI = otherAI.getAIBehind();
-          continue;
-        }
+        System.out.println("fa4");
+        //if(otherAI.getAIBehind() != null){
+        //  System.out.println("fa5");
+        //  otherAI = otherAI.getAIBehind();
+        //  continue;
+        //}System.out.println("fa5111");
         //otherwise, it means we reached the end of the trailing line. Add self to end of line.
-        otherAI.setAIBehind(this);
-        target = player;
-        setAIInFront(otherAI);
+        otherAI.setAIBehind(this); System.out.println("fa6");
+        target = player; System.out.println("fa7");
+        setAIInFront(otherAI); System.out.println("fa8");
         break;//end of loop
       }
       //println("ESCAPE WHILE LOOP");
     } else {
-      target = player;
-      player.setAIFollowing(this);
+      System.out.println("fa9");
+      target = player; System.out.println("fa10");
+      player.setAIFollowing(this);System.out.println("fa11");
     }
     isLost = false;
   }
@@ -122,23 +135,30 @@ class FriendlyAI extends Body { //Similar to Player except follows steering algo
   public boolean arrived() {
     return arrived;
   }
-  public void setTargetPlanet(Planet planet) {
-    this.targetPlanet = planet;
+  public void seekPlanet() {
+    this.seekPlanet = true;
   }
-  public Planet getTargetPlanet() {
-    return targetPlanet;
+  
+  public boolean isSeeking() {
+    return seekPlanet;
   }
+
   public void integrate() {
+    System.out.println("FAI");
     if(health == 0){
       //DESPAWN WHEN HEALTH IS 0, RESET.
     }
-  
-    if(targetPlanet!=null) {
+    if (aiInFront != null && (aiInFront.isSeeking())) {
+      setTarget(target);  //  //<>//
+      aiInFront = null;  // //<>//
+      target.setAIFollowing(this); //<>//
+    }
+    if(seekPlanet) {
       moveToSurface();
     }
     else {
       if(position.dist(player1.getPosition()) < 500 && isLost) {
-        setTarget(player1);
+        setTarget(player1); ///////////////////////
         isLost = false;
       }
       if(position.dist(player2.getPosition()) < 500 && isLost) {
@@ -208,10 +228,10 @@ class FriendlyAI extends Body { //Similar to Player except follows steering algo
   
   
   public void moveToSurface() {
-    if(position.dist(targetPlanet.getPosition()) - targetPlanet.getDiameter() /2 < 5) {arrived = true;}
-    PVector toPlanetCenter = PVector.sub(targetPlanet.getPosition(), position);
-    toPlanetCenter.setMag(targetPlanet.getDiameter() / 2 + 5); // Move to just outside the planet's surface
-    PVector targetPosition = PVector.add(targetPlanet.getPosition(), toPlanetCenter);
+    if(position.dist(destination.getPosition()) - destination.getDiameter() /2 < 5) {arrived = true;}
+    PVector toPlanetCenter = PVector.sub(destination.getPosition(), position);
+    toPlanetCenter.setMag(destination.getDiameter() / 2 + 5); // Move to just outside the planet's surface
+    PVector targetPosition = PVector.add(destination.getPosition(), toPlanetCenter);
     fleeOrSeek(targetPosition, 1); // Seek towards the calculated position on the surface
     velocity.mult(SLOW_DOWN);
   }

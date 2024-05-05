@@ -15,7 +15,7 @@ class Player extends Body {
   
   private final float radius = 7;
   
-
+  private int AIs = 0;
   public boolean thrustUp = false; 
   public boolean thrustRight = false;
   public boolean thrustLeft = false;
@@ -260,5 +260,15 @@ class Player extends Body {
   
   public FriendlyAI getAIBehindPlayer(){
     return aiBehindPlayer;
+  }
+  
+  public int getAIs() {
+    return AIs;
+  }
+  public void increaseAIs() {
+    AIs++;
+  }
+  public void decreaseAIs() {
+    AIs--;
   }
 }
