@@ -21,7 +21,7 @@ class UI{
     }
     for (Mission mission : missionManager.getActiveMissions()) {
       String typeText = mission.getType() ? "CARGO" : "ESCORT";
-      fill(250);
+      fill(215, 219, 220);
       textSize(heightUIOffset / 4 - 10);
       textAlign(LEFT);
       text(typeText, xStart, yStart);
@@ -35,7 +35,7 @@ class UI{
         ellipse(x, yStart - textAscent() / 2, heightUIOffset * 0.2, heightUIOffset * 0.2); // 
         x += heightUIOffset * 0.2; // Space between planets
       }
-      fill(250);
+      fill(215, 219, 220);
       String deliverText = "DELIVER TO";
       text(deliverText, x, yStart);
       x += textWidth(deliverText) + 20;
@@ -44,6 +44,8 @@ class UI{
         ellipse(x, yStart - textAscent() / 2, heightUIOffset * 0.2, heightUIOffset * 0.2); // 
         x += heightUIOffset * 0.2; // Space between planets
       }
+      fill(215, 219, 220);
+      text("POINTS: " + mission.getScore(), x, yStart);
       yStart -= spacingY; // Spacing between mission displays
     }
     textAlign(CENTER);

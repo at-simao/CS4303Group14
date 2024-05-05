@@ -110,11 +110,13 @@ abstract class Mission {
         }
     }
     else {
-      distance = map.planets.indexOf(pickupPlanets.get(0));
+      for(int i = 0; i < pickupPlanets.size(); i++) {
+        distance += abs(map.planets.indexOf(pickupPlanets.get(i)) - map.planets.indexOf(destinationPlanets.get(i)));
+      }
     }
-    float missionMulti = isCargoMission ? 1 : 1.25; 
+    float missionMulti = isCargoMission ? 1 : 1; 
     int scorePerPlanet = 100; // Score per planet involved
-    int planetScore = isCargoMission ? scorePerPlanet * pickupPlanets.size() : scorePerPlanet;
+    int planetScore = scorePerPlanet * pickupPlanets.size();
     int distanceScore = (int)(distance * 50); 
     
     int totalScore = (int)(100 + planetScore + distanceScore * missionMulti);
