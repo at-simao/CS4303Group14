@@ -28,6 +28,8 @@ class Player extends Body {
   private boolean hasCargo = false;
   private Planet cargo;
   
+  private FriendlyAI aiBehindPlayer = null;
+  
   public Player(PVector start, int whichPlayer) {
     super(start, new PVector(0,0), 0.01);
     if(whichPlayer == 1){
@@ -42,7 +44,6 @@ class Player extends Body {
   
   public void updateRespawnTimer(){
     if(health <= 0 && respawnTimer == null){
-      health = 0;
       //DESPAWN PLAYER WHEN HEALTH IS 0, RESET.
       respawnTimer = new Timer(15000, position, radius*2.5, color(100), color(180));
       velocity.setMag(0);
@@ -50,6 +51,7 @@ class Player extends Body {
     }
     if(respawnTimer != null){
       respawnTimer.updateTimer();
+      health = MAX_HEALTH*((respawnTimer.getMaxTime() - respawnTimer.getCurrTime())/respawnTimer.getMaxTime());
       return;
     }
   }
@@ -248,5 +250,13 @@ class Player extends Body {
   
   public float getRadius(){
     return radius;
+  }
+  
+  public void setAIFollowing(FriendlyAI ai){
+    aiBehindPlayer = ai;
+  }
+  
+  public FriendlyAI getAIBehindPlayer(){
+    return aiBehindPlayer;
   }
 }

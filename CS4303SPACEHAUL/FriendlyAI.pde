@@ -8,6 +8,8 @@ class FriendlyAI extends Body { //Similar to Player except follows steering algo
   private final float radius = 4;  
   private color colour;  
   Player target = null;
+  FriendlyAI aiBehind = null;
+  FriendlyAI aiInFront = null;
   private final float maxAcc = 3; //defined in proportion to speed. 
   private PVector wanderTarget;
   private boolean isLost = false;
@@ -21,7 +23,25 @@ class FriendlyAI extends Body { //Similar to Player except follows steering algo
   
   //Establishes player as target to trail behind.
   public void setTarget(Player player){
-    target = player;
+    FriendlyAI otherAI = player.getAIBehindPlayer();
+    if(otherAI != null){
+      //follow trail of AI behind player.
+      //println("IN WHILE LOOP" + frameCount);
+      while(true){
+        if(otherAI.getAIBehind() != null){
+          otherAI = otherAI.getAIBehind();
+          continue;
+        }
+        //otherwise, it means we reached the end of the trailing line. Add self to end of line.
+        otherAI.setAIBehind(this);
+        target = player;
+        setAIInFront(otherAI);
+        break;//end of loop
+      }
+    } else {
+      target = player;
+      player.setAIFollowing(this);
+    }
     isLost = false;
   }
   
@@ -66,20 +86,34 @@ class FriendlyAI extends Body { //Similar to Player except follows steering algo
   
   //An adapted for of steering, the AI seeks and accelerates towards the player's trail. The AI also smoothly follows player once velocity matches.
   public void tailBehind(){ //adapted from: https://studres.cs.st-andrews.ac.uk/CS4303/Lectures/L9/PursueSketch/PursueSketch.pde
-    //Instead of targetting where player is going, we target where player was. Ensures we are never in the way of the player, which may be needed if player is trying to avoid obstacles for this friendly AI.
-    if(target == null){
+    //Instead of targetting where player/ai in front is going, we target where target was. Ensures we are never in the way of the player, which may be needed if player is trying to avoid obstacles for this friendly AI.
+    if(target == null && aiInFront == null){
       velocity.mult(SLOW_DOWN);
       return;
     }
-        
-    PVector tail = target.getVelocity().copy().normalize();
-    tail.mult(-(target.getRadius()*4)) ; //directly behind player.
-    tail.add(target.getPosition()) ;
-    if(position.dist(target.getPosition()) > target.getRadius()*6){ //satisfiability radius
+      
+    PVector tail;
+    PVector targetPosition;
+    PVector targetVelocity;
+    float targetRadius;
+    if(aiInFront != null){
+      tail = aiInFront.getVelocity().copy().normalize();
+      targetPosition = aiInFront.getPosition();
+      targetRadius = aiInFront.getRadius();
+      targetVelocity = aiInFront.getVelocity();
+    } else { //if no ai in front, means player is in front.
+      tail = target.getVelocity().copy().normalize();
+      targetPosition = target.getPosition();
+      targetRadius = target.getRadius();
+      targetVelocity = target.getVelocity();
+    }
+    tail.mult(-(targetRadius*4)) ; //directly behind player.
+    tail.add(targetPosition) ;
+    if(position.dist(targetPosition) > targetRadius*6){ //satisfiability radius
       fleeOrSeek(tail, 1);
-    } else if(position.dist(target.getPosition()) > target.getRadius()*4 && target.getVelocity().mag() > 0.5){ //condition only relevant if player is moving, as the AI must pursue as very dynamicaly moving target (player).
+    } else if(position.dist(targetPosition) > targetRadius*4 && targetVelocity.mag() > 0.5){ //condition only relevant if player is moving, as the AI must pursue as very dynamicaly moving target (player).
       fleeOrSeek(tail, 1);
-      velocity.setMag(target.getVelocity().mag());
+      velocity.setMag(targetVelocity.mag());
       return; //no slow down, should be smooth movement when this close.
     }
     velocity.mult(SLOW_DOWN);
@@ -113,6 +147,11 @@ class FriendlyAI extends Body { //Similar to Player except follows steering algo
       if(position.dist(target.getPosition()) > 500) {
         if(!isLost) {
           isLost = true;
+          aiInFront = null;
+          aiBehind = null;
+          if(target.getAIBehindPlayer() == this){
+            target.setAIFollowing(null);
+          }
           wanderTarget = target.getPosition().copy();
         }
         wander();
@@ -207,5 +246,21 @@ class FriendlyAI extends Body { //Similar to Player except follows steering algo
   
   public boolean hasATarget(){
     return (target != null);
+  }
+  
+  public FriendlyAI getAIBehind(){
+    return aiBehind;
+  }
+  
+  public FriendlyAI getAIInFront(){
+    return aiInFront;
+  }
+  
+  public void setAIBehind(FriendlyAI ai){
+    aiBehind = ai;
+  }
+  
+  public void setAIInFront(FriendlyAI ai){
+    aiInFront = ai;
   }
 }
