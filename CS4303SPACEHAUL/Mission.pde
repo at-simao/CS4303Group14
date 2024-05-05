@@ -85,7 +85,7 @@ abstract class Mission {
       textSize(30);
       stroke(0,0,0);
       textAlign(CENTER, CENTER);
-      fill(0);
+      fill(255);
       text("Press "+(player == player1 ? "E" : "1") + " to interact", player == player1 ? width/4 : width/4*3, height / 4 * 3); // Position above the player
     }
 

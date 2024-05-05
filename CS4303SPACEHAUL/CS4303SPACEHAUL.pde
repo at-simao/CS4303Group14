@@ -34,6 +34,7 @@ PImage player1Screen = null;
 PImage player2Screen = null;
 
 Hazards hazards = new Hazards(); //Hazards class keeps track of all meteors currently rendered and existing. Spawn as player gets near (procedurally), despawn as player moves away.
+BackgroundStars stars = new BackgroundStars();
  
 static public PGraphics offScreenBuffer; //to refer to the buffer outside of this class, use CS4303SPACEHAUL.offScreenBuffer, use this when performing any draw methods (e.g. CS4303SPACEHAUL.offScreenBuffer.line(...))
 //This is used to render to an offscreen image, which we later draw when displaying the split-screen.
@@ -166,6 +167,9 @@ void physicsAndLogicUpdate() {
   hazards.generate(player1, player2, 2);
   hazards.deleteHazard(player1, player2);
   hazards.integrate(player1, player2, aiList);
+  stars.generate(player1, player2, 1);
+  stars.generate(player1, player2, 2);
+  stars.deleteStar(player1, player2);
   friendlyAILogicUpdate();
 }
 
@@ -174,7 +178,7 @@ void applyGravityToPlayer(Player player){
 }
 
 void drawUpdate(){
-  if(player1ZoomOut){
+    if(player1ZoomOut){
       camera1.setZoom(ZOOM_OUT_VALUE); //debug feature: zoom out to better see solar system. Press Z to activate, and X to deactivate.
     } else {
       camera1.setZoom(3 / min((1+0.03*player1.getVelocity().mag()), MAX_ZOOM_OUT)); //zoom out effect to give feeling to player of FTL travel.
@@ -286,7 +290,7 @@ void updateMission() {
 PImage playerScreenDraw(Player player, Camera cameraForPlayer) {
   //fill(255);
   offScreenBuffer.beginDraw();
-  offScreenBuffer.background(#CECECE);
+  offScreenBuffer.background(0);
   offScreenBuffer.noSmooth();
   offScreenBuffer.textSize(8);
 
@@ -295,7 +299,7 @@ PImage playerScreenDraw(Player player, Camera cameraForPlayer) {
 
   cameraForPlayer.begin(player.getPosition());
 
-  drawGrid();
+  stars.draw();
   map.draw();
   
   player1.draw();
@@ -388,6 +392,8 @@ public void resetFromGameOver(){ //MIGHT NEED TO BE EDITED - some temp code incl
   randomPlanets.add(map.planets.get(1));
   randomPlanets2.add(map.planets.get(0));
   missionManager.addMission(new CargoMission(randomPlanets, randomPlanets2));
+  stars.clear();
+  hazards.clear();
   
 }
 

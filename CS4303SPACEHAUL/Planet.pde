@@ -46,8 +46,18 @@ class Planet {
     CS4303SPACEHAUL.offScreenBuffer.translate(orbit, 0); // Move to the correct position in the orbit
     CS4303SPACEHAUL.offScreenBuffer.fill(colour); // Set the color for the planet
     CS4303SPACEHAUL.offScreenBuffer.noStroke(); // No border for the planet
-    CS4303SPACEHAUL.offScreenBuffer.ellipse(0, 0, diameter, diameter); // Draw the planet as a circle
-    
+    //CS4303SPACEHAUL.offScreenBuffer.ellipse(0, 0, diameter, diameter); // Draw the planet as a circle
+    if(this != CS4303SPACEHAUL.map.star){
+      CS4303SPACEHAUL.offScreenBuffer.arc(0,0,diameter,diameter,HALF_PI, HALF_PI*3);
+      CS4303SPACEHAUL.offScreenBuffer.fill(lerpColor(color(0,0,0), colour, 0.5)); // Set the color for the planet
+      CS4303SPACEHAUL.offScreenBuffer.rotate(PI); // Rotate the coordinate system by the current angle
+      CS4303SPACEHAUL.offScreenBuffer.arc(0,0,diameter,diameter,HALF_PI, HALF_PI*3);
+      CS4303SPACEHAUL.offScreenBuffer.rotate(-PI); // Rotate the coordinate system by the current angle
+    } else {
+      CS4303SPACEHAUL.offScreenBuffer.ellipse(0, 0, diameter, diameter); // Draw the planet as a circle
+    }
+
+
     if(missionPlanet) {
       drawPickup();
     }
@@ -56,7 +66,7 @@ class Planet {
   }
   
   private void drawPickup() {
-        CS4303SPACEHAUL.offScreenBuffer.stroke(0, 0, 0); // Yellow color for visibility
+        CS4303SPACEHAUL.offScreenBuffer.stroke(255, 255, 255); // Yellow color for visibility
         CS4303SPACEHAUL.offScreenBuffer.noFill();
         float radius = diameter;  // Slightly larger than the planet's diameter
         float angleStep = TWO_PI / 60;

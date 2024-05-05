@@ -11,14 +11,15 @@ class UI{
   
   void draw() {
     fill(0);
-    noStroke();
-    rect(0, 0, width, heightUIOffset);
+    stroke(255);
+    rect(0, 0, width*0.999, heightUIOffset);
     float xStart = 0.01 * width;
     float yStart = heightUIOffset - 10;
     float spacingY = heightUIOffset / 3; // 
     if(CS4303SPACEHAUL.restartAnimationFlag){
       return;
     }
+    noStroke();
     for (Mission mission : missionManager.getActiveMissions()) {
       String typeText = mission.getType() ? "CARGO" : "ESCORT";
       fill(215, 219, 220);

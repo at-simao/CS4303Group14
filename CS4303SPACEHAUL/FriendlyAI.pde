@@ -76,7 +76,7 @@ class FriendlyAI extends Body { //Similar to Player except follows steering algo
   //To avoid crashing into planets, AI flies around the planet to get to target.
   public void avoidPlanets(){
     for(Planet planet : CS4303SPACEHAUL.map.planets){
-      if(planet.getPosition().dist(position) < ((planet.getDiameter()/2)+radius)*1.5){
+      if(planet.getPosition().dist(position) < ((planet.getDiameter())+radius)*1.5){
         velocity.add(position.copy().sub(planet.getPosition()).normalize().mult(maxAcc/1.5)); 
       } 
     }

@@ -219,4 +219,8 @@ class Hazards { //Maintains all hazards on map and handles collision logic for e
     chanceOfNewMeteor *= chanceChangePerWave;
     MAX_METEORS += 10;
   }
+  
+  public void clear(){
+    meteors.clear();
+  }
 }

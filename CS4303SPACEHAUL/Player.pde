@@ -35,7 +35,7 @@ class Player extends Body {
     if(whichPlayer == 1){
       colour = color(255,0,0);
     } else {
-      colour = color(0,0,255);
+      colour = color(0,70,200);
     }
     for(int i = 0; i < trailing.length; i++){
       trailing[i] = new PVector(start.x, start.y, orientation); //overloading PVector semantics to store x,y,orientation as 3D vector.
