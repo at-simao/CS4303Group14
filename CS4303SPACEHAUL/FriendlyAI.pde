@@ -31,30 +31,25 @@ class FriendlyAI extends Body { //Similar to Player except follows steering algo
   
   //Establishes player as target to trail behind.
   public void setTarget(Player player){
-    System.out.println("fa2");
-    FriendlyAI otherAI = player.getAIBehindPlayer(); System.out.println("fa1");
+    FriendlyAI otherAI = player.getAIBehindPlayer(); 
     if(otherAI != null){
       //follow trail of AI behind player.
       //println("IN WHILE LOOP" + frameCount);
-      System.out.println("fa3");
       while(true){
-        System.out.println("fa4");
         //if(otherAI.getAIBehind() != null){
-        //  System.out.println("fa5");
         //  otherAI = otherAI.getAIBehind();
         //  continue;
-        //}System.out.println("fa5111");
+        //}
         //otherwise, it means we reached the end of the trailing line. Add self to end of line.
-        otherAI.setAIBehind(this); System.out.println("fa6");
-        target = player; System.out.println("fa7");
-        setAIInFront(otherAI); System.out.println("fa8");
+        otherAI.setAIBehind(this); 
+        target = player; 
+        setAIInFront(otherAI);
         break;//end of loop
       }
       //println("ESCAPE WHILE LOOP");
     } else {
-      System.out.println("fa9");
-      target = player; System.out.println("fa10");
-      player.setAIFollowing(this);System.out.println("fa11");
+      target = player; 
+      player.setAIFollowing(this);
     }
     isLost = false;
   }
@@ -144,7 +139,6 @@ class FriendlyAI extends Body { //Similar to Player except follows steering algo
   }
 
   public void integrate() {
-    System.out.println("FAI");
     if(health == 0){
       //DESPAWN WHEN HEALTH IS 0, RESET.
     }

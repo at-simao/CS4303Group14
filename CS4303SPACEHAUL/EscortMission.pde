@@ -13,13 +13,11 @@ class EscortMission extends Mission {
   public boolean attemptAction(Player player) { //<>//
     Iterator<Planet> planetIterator = pickupPlanets.iterator();
     Iterator<Planet> destinationIterator = destinationPlanets.iterator();
-        System.out.println("EAA");
     // Change
     for(FriendlyAI ai: escortAIs) {
       if(escortPlayers.get(ai) == player && ai.getPosition().dist(ai.getDestination().getPosition()) < ai.getDestination().getDiameter()) {
         ai.seekPlanet();  // Set seek true instead
         player.decreaseAIs();
-        System.out.println("EAA2");
         return true; //<>//
       }
     }
@@ -27,29 +25,23 @@ class EscortMission extends Mission {
     while (planetIterator.hasNext()) {
       Planet origin = planetIterator.next();
       Planet destination = destinationIterator.next();
-      System.out.println("EAA3");
      // if (!aiSpawned.containsKey(origin) && player.getPosition().dist(origin.getPosition()) < origin.getDiameter()) {
       if (player.getPosition().dist(origin.getPosition()) < origin.getDiameter()) {
-        System.out.println("EAA4");
         if(player.getAIs() > 1) {break;}
-        System.out.println("EAA5");
-        FriendlyAI newAI = new FriendlyAI(origin.getPosition(), destination);System.out.println("EAA51");
-        aiList.add(newAI);System.out.println("EAA52");
-        newAI.setTarget(player); System.out.println("EAA53"); // move to constructor
-        escortAIs.add(newAI);System.out.println("EAA54");
-        aiSpawned.put(newAI, true);System.out.println("EAA55");
-        escortPlayers.put(newAI, player);System.out.println("EAA56");
-        updateUi(origin.getColour());System.out.println("EAA57");
-        planetIterator.remove(); System.out.println("EAA58");// Remove planet from pickup list after AI is spawned
-        destinationIterator.remove();System.out.println("EAA59");
+        FriendlyAI newAI = new FriendlyAI(origin.getPosition(), destination);
+        aiList.add(newAI);
+        newAI.setTarget(player);  // move to constructor
+        escortAIs.add(newAI);
+        aiSpawned.put(newAI, true);
+        escortPlayers.put(newAI, player);
+        updateUi(origin.getColour());
+        planetIterator.remove(); // Remove planet from pickup list after AI is spawned
+        destinationIterator.remove();
         player.increaseAIs();
-        System.out.println("EAA6");
         if(!pickupPlanets.contains(origin)) {missionManager.updatePickupZone(origin);}
-        System.out.println("EAA7");
         return true;
       }
     }
-    System.out.println("EAA8");
     return false;
   }
     
