@@ -2,9 +2,12 @@ class Hazards { //Maintains all hazards on map and handles collision logic for e
   
   private float ELASTICITY = 0.5; //how much kinetic energy remains in colliding meteor, and how much is transferred to hit meteor (1-ELASTICITY).
   
-  private int MAX_METEORS = 100;
+  private float FRICTION = 0.1;
+  
+  private int MAX_METEORS = 40;
   
   private float chanceOfNewMeteor = 0.96; //note that this probability is twice as high as current value, as attempt to generate meteors twice per frame.
+  private float chanceChangePerWave = 0.925; //note that this probability is twice as high as current value, as attempt to generate meteors twice per frame.
   
   private float distanceOfSpawn = 600;
   
@@ -103,8 +106,7 @@ class Hazards { //Maintains all hazards on map and handles collision logic for e
           meteor2.getPosition().x -= meteor2.getVelocity().x;
           meteor2.getPosition().y -= meteor2.getVelocity().y;
           //determine position of collision, then call handler. It is called twice to handle both frames of reference, when one is incident on the other, and vice-versa.
-          handleCollision(meteor, meteor2, meteorPosition.copy().sub(meteor2Position), true);
-          handleCollision(meteor2, meteor, meteorPosition.copy().sub(meteor2Position), false);
+          handleCollision(meteor, meteor2, meteor2Position.copy().sub(meteorPosition).normalize());
         }
       }
     }
@@ -163,25 +165,62 @@ class Hazards { //Maintains all hazards on map and handles collision logic for e
   }
   
   //We simulate kinetic energy transfer between two moving objects, and change in direction in movement for both.
-  private void handleCollision(Meteor m1, Meteor m2, PVector positionOfCollision, boolean firstCalc){
-    //from m1's perspective as stationary
-    PVector normal = positionOfCollision.copy().sub(m1.getPosition()).normalize().mult(-1);
+  private void handleCollision(Meteor m1, Meteor m2, PVector normalOfCollision){
+    //from m1's perspective as stationary and m2 as incident on it.
     PVector incidentVelocity = m2.getVelocity().copy().normalize();
-    float oldSpeed = m2.getVelocity().mag();
-    float angleOfIncidence = normal.dot(incidentVelocity);
+    float oldSpeedM2 = m2.getVelocity().mag();
+    PVector m2Reflection = returnReflectionVector(incidentVelocity, normalOfCollision);
+    //when m2 is stationary
+    incidentVelocity = m1.getVelocity().copy().normalize();
+    float oldSpeedM1 = m1.getVelocity().mag();
+    PVector m1Reflection = returnReflectionVector(incidentVelocity, normalOfCollision.mult(-1));
+    m1Reflection.mult(oldSpeedM1*(ELASTICITY-FRICTION)); //perfect reflection of m1's movement
+    m2Reflection.mult(oldSpeedM2*(ELASTICITY-FRICTION)); //perfect reflection of m2's movement
     
-    PVector reflection = normal.mult(2*angleOfIncidence);
-    reflection.sub(incidentVelocity).normalize();
-    if(firstCalc){
-      reflection.mult(ELASTICITY);
-      PVector transferredEnergy = positionOfCollision.sub(m1.getPosition()).normalize().mult(oldSpeed*(1-ELASTICITY));
+    PVector transferredEnergyFromM2 = normalOfCollision.copy().mult(oldSpeedM2*(1-(ELASTICITY - FRICTION)));
+    PVector transferredEnergyFromM1 = normalOfCollision.mult(-1).mult(oldSpeedM1*(1-ELASTICITY - FRICTION));
     
-      m1.getVelocity().x += transferredEnergy.x;
-      m1.getVelocity().y += transferredEnergy.y;
+    
+    m1Reflection.x += transferredEnergyFromM2.x;
+    m1Reflection.y += transferredEnergyFromM2.y; //(1-elasticity) of m1's energy goes to m2, making reflection imperfect. 
+    m2Reflection.x += transferredEnergyFromM1.x;
+    m2Reflection.y += transferredEnergyFromM1.y; //(1-elasticity) of m1's energy goes to m2, making reflection imperfect.
+    
+    m1.setVelocity(m1Reflection.copy());
+    m2.setVelocity(m2Reflection.copy());
+    int clockWiseOrNot = -1; //by default clockwise
+    if(m1.getPosition().x < m2.getPosition().x){
+      if(m2.getVelocity().y < 0 && abs(m2.getVelocity().y) > abs(m2.getVelocity().x)) {
+        clockWiseOrNot = 1;
+      } else if(m2.getVelocity().y >= 0 && abs(m2.getVelocity().y) <= abs(m2.getVelocity().x)) {
+        clockWiseOrNot = 1;
+      }
+    } else {
+      if(m2.getVelocity().y >= 0 && abs(m2.getVelocity().y) > abs(m2.getVelocity().x)) {
+        clockWiseOrNot = 1;
+      } else if(m2.getVelocity().y < 0 && abs(m2.getVelocity().y) <= abs(m2.getVelocity().x)) {
+        clockWiseOrNot = 1;
+      }
     }
-    reflection.mult(oldSpeed);
-    m2.setVelocity(reflection.copy());
-    
-    
+    if(m2.getVelocity().mag() > 0.1){
+      m1.changeAngularMomentum(FRICTION*oldSpeedM2*clockWiseOrNot);
+    }
+    if(m1.getVelocity().mag() > 0.1){
+      m2.changeAngularMomentum(FRICTION*oldSpeedM1*-clockWiseOrNot);
+    }
+  }
+  
+  private PVector returnReflectionVector(PVector incidence, PVector normal){
+    float angleOfIncidence = normal.dot(incidence);
+    return normal.mult(2*angleOfIncidence).sub(incidence).normalize().copy();
+  }
+  
+  public void updateChanceOfMeteors(){
+    chanceOfNewMeteor *= chanceChangePerWave;
+    MAX_METEORS += 10;
+  }
+  
+  public void clear(){
+    meteors.clear();
   }
 }

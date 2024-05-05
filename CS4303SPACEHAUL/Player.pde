@@ -15,7 +15,7 @@ class Player extends Body {
   
   private final float radius = 7;
   
-
+  private int AIs = 0;
   public boolean thrustUp = false; 
   public boolean thrustRight = false;
   public boolean thrustLeft = false;
@@ -24,13 +24,18 @@ class Player extends Body {
   private color colour;
   
   private PVector[] trailing = new PVector[10];
+  private Timer respawnTimer = null;
+  private boolean hasCargo = false;
+  private Planet cargo;
+  
+  private FriendlyAI aiBehindPlayer = null;
   
   public Player(PVector start, int whichPlayer) {
     super(start, new PVector(0,0), 0.1);
     if(whichPlayer == 1){
       colour = color(255,0,0);
     } else {
-      colour = color(0,0,255);
+      colour = color(0,70,200);
     }
     for(int i = 0; i < trailing.length; i++){
       trailing[i] = new PVector(start.x, start.y, orientation); //overloading PVector semantics to store x,y,orientation as 3D vector.
@@ -48,9 +53,23 @@ class Player extends Body {
     forceAccumulator.y = 0;
   }
   
-  public void integrate() {
-    if(health == 0){
+  public void updateRespawnTimer(){
+    if(health <= 0 && respawnTimer == null){
       //DESPAWN PLAYER WHEN HEALTH IS 0, RESET.
+      respawnTimer = new Timer(15000, position, radius*2.5, color(100), color(180));
+      velocity.setMag(0);
+      return;
+    }
+    if(respawnTimer != null){
+      respawnTimer.updateTimer();
+      health = MAX_HEALTH*((respawnTimer.getMaxTime() - respawnTimer.getCurrTime())/respawnTimer.getMaxTime());
+      return;
+    }
+  }
+  
+  public void integrate() {
+    if(respawnTimer != null){
+      return; //no movement allowed until timer is spent.
     }
     //shift trailing by 1 to the right
     PVector temp = trailing[1];
@@ -104,7 +123,21 @@ class Player extends Body {
     //   velocity.y = (velocity.y / abs(velocity.y)) * MAX_VELOCITY;
     // }
 
-    println(position);
+   // println(position);
+  }
+  
+  public void setCargo(Planet newCargo) {
+    hasCargo = true;    
+    this.cargo = newCargo;
+    if(newCargo == null) hasCargo = false;
+  }
+
+  public Planet getCargo() {
+     return this.cargo;
+  }
+  
+  public boolean hasCargo() {
+    return this.hasCargo;
   }
   
   private void updateOrientation(){
@@ -112,30 +145,38 @@ class Player extends Body {
   }
   
   private void updateThrust(){
+    PVector temp = new PVector(0,0);
     if(thrustLeft && thrustRight){
       velocity.mult(SLOW_DOWN);
       return;
     } else if (thrustRight){
-      velocity.y += sin(PI)*THRUST_INCREMENT; //vertical component of unit circle
-      velocity.x += cos(PI)*THRUST_INCREMENT; //horizontal component
+      temp.x = -1; //horizontal component
     } else if (thrustLeft){
-      velocity.y += sin(0)*THRUST_INCREMENT; //vertical component of unit circle
-      velocity.x += cos(0)*THRUST_INCREMENT; //horizontal component
+      temp.x = 1; //horizontal component
     }
     if(thrustUp){
-      velocity.y -= sin(HALF_PI)*THRUST_INCREMENT; //vertical component of unit circle
-      velocity.x -= cos(HALF_PI)*THRUST_INCREMENT; //horizontal component
-      //effect is vector added to velocity with magnitude THRUST_INCREMENT, pointing in direction of orientation.
+      temp.y = -1; //horizontal component
     } else if (thrustDown){
-      velocity.y += sin(HALF_PI)*THRUST_INCREMENT;
-      velocity.x += cos(HALF_PI)*THRUST_INCREMENT;
+      temp.y = 1; //horizontal component
     }
+    temp.normalize().mult(THRUST_INCREMENT);
+    velocity.add(temp);
     
     //we do not reset velocity due to the lack of drag force in space. Only slow down if player presses thurstLeft and thrustRight at the same time.
   }
   
   public void draw() {
     CS4303SPACEHAUL.offScreenBuffer.noStroke();
+    if(respawnTimer != null){
+      drawUpTo = 0;
+      if(respawnTimer.outOfTime()){
+        respawnTimer = null;
+        health = MAX_HEALTH;
+        return;
+      }
+      respawnTimer.draw();
+      return;
+    }
     if(velocity.mag() > HYPERSPEED_MIN){
       drawUpTo++;
       drawUpTo = min(drawUpTo, trailing.length*3);
@@ -144,6 +185,7 @@ class Player extends Body {
       drawUpTo = max(drawUpTo, 0);
     }
     for(int i = 0; i < floor(drawUpTo/3); i++){
+      CS4303SPACEHAUL.offScreenBuffer.noStroke();
       CS4303SPACEHAUL.offScreenBuffer.fill(255, 255, 255, floor(float(200*(trailing.length-i))/trailing.length));
       CS4303SPACEHAUL.offScreenBuffer.translate(trailing[i].x, trailing[i].y);
       CS4303SPACEHAUL.offScreenBuffer.rotate(-trailing[i].z+HALF_PI); //.z == orientation
@@ -154,6 +196,14 @@ class Player extends Body {
     CS4303SPACEHAUL.offScreenBuffer.translate(position.x, position.y);
     //draw player sprite
     CS4303SPACEHAUL.offScreenBuffer.fill(colour);
+        // Check if player has cargo and draw outline
+    if (hasCargo) {
+        CS4303SPACEHAUL.offScreenBuffer.stroke(cargo.getColour()); // Green outline
+        CS4303SPACEHAUL.offScreenBuffer.strokeWeight(1.5);   // Set the weight of the outline
+    } else {
+        CS4303SPACEHAUL.offScreenBuffer.noStroke(); // No outline if no cargo
+    }
+    
     CS4303SPACEHAUL.offScreenBuffer.rotate(-orientation+HALF_PI);
     CS4303SPACEHAUL.offScreenBuffer.triangle(-radius, -radius, -radius, radius, radius*2, 0);
     CS4303SPACEHAUL.offScreenBuffer.fill(colour);    
@@ -172,8 +222,12 @@ class Player extends Body {
   }
   
   public void drawImpulseIndicator(){ //draws circle in direction of impulse/where player is accelerating.
+    CS4303SPACEHAUL.offScreenBuffer.noStroke();
     int upOrDown = 0;
     int leftOrRight = 0;
+    if(!(thrustLeft || thrustRight || thrustUp || thrustDown)) {
+      return;// no acceleration
+    }
     if(thrustLeft && thrustRight){
       return; //no need to draw, SLOW_DOWN is in effect.
     }if(thrustRight){
@@ -198,6 +252,7 @@ class Player extends Body {
   public void changeHealthBy(float increment){
     health += increment;
     health = min(health, MAX_HEALTH);
+    health = max(health, 0);
   }
   
   public float getHealth(){
@@ -206,5 +261,23 @@ class Player extends Body {
   
   public float getRadius(){
     return radius;
+  }
+  
+  public void setAIFollowing(FriendlyAI ai){
+    aiBehindPlayer = ai;
+  }
+  
+  public FriendlyAI getAIBehindPlayer(){
+    return aiBehindPlayer;
+  }
+  
+  public int getAIs() {
+    return AIs;
+  }
+  public void increaseAIs() {
+    AIs++;
+  }
+  public void decreaseAIs() {
+    AIs--;
   }
 }

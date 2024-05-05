@@ -3,9 +3,7 @@ class FriendlyAI extends Body { // Similar to Player except follows steering alg
 
   private float health = 100;
   private final float MAX_HEALTH = 100;
-  
   private float orientation = 0.0;
-  
   private final float SLOW_DOWN = 0.7; //drag
   
   private final float radius = 4;
@@ -13,20 +11,54 @@ class FriendlyAI extends Body { // Similar to Player except follows steering alg
   private color colour;
   
   Player target = null;
+  FriendlyAI aiBehind = null;
+  FriendlyAI aiInFront = null;
+  private final float maxAcc = 3; //defined in proportion to speed. 
+  private PVector wanderTarget;
+  private boolean isLost = false;
+ // private Planet targetPlanet;  //rework
+  private boolean seekPlanet = false;
+  private Planet destination;
+  private boolean arrived;
+  private float visibilityRadius = radius*8;
   
-  private final float maxAcc = 3; //defined in proportion to speed.
-  
-  private Body targetPlanet = null; //variable used to determine when escort reaches destination. currently unused.
-
-  
-  public FriendlyAI(PVector start) {
+  public FriendlyAI(PVector start, Planet goal) {
     super(start, new PVector(0,0), 0.01);
-    colour = color(0,200,0);
+    colour = goal.getColour();
+    destination = goal;
+  }
+  
+  public Planet getDestination() {
+    return destination;
   }
   
   //Establishes player as target to trail behind.
   public void setTarget(Player player){
-    target = player;
+    FriendlyAI otherAI = player.getAIBehindPlayer(); 
+    if(otherAI != null){
+      //follow trail of AI behind player.
+      //println("IN WHILE LOOP" + frameCount);
+      while(true){
+        //if(otherAI.getAIBehind() != null){
+        //  otherAI = otherAI.getAIBehind();
+        //  continue;
+        //}
+        //otherwise, it means we reached the end of the trailing line. Add self to end of line.
+        otherAI.setAIBehind(this); 
+        target = player; 
+        setAIInFront(otherAI);
+        break;//end of loop
+      }
+      //println("ESCAPE WHILE LOOP");
+    } else {
+      target = player; 
+      player.setAIFollowing(this);
+    }
+    isLost = false;
+  }
+  
+  public color getColour() {
+    return colour;
   }
   
   PVector fleeOrSeek(PVector pointOfInterest, int fleeOrSeek){
@@ -47,41 +79,105 @@ class FriendlyAI extends Body { // Similar to Player except follows steering alg
   //To avoid crashing into planets, AI flies around the planet to get to target.
   public void avoidPlanets(){
     for(Planet planet : CS4303SPACEHAUL.map.planets){
-      if(planet.getPosition().dist(position) < ((planet.getDiameter()/2)+radius)*1.5){
+      if(planet.getPosition().dist(position) < ((planet.getDiameter())+radius)*1.5){
         velocity.add(position.copy().sub(planet.getPosition()).normalize().mult(maxAcc/1.5)); 
       } 
     }
   }
   
+  // simple lost movement temp
+  private void wander() {
+    velocity.mult(0);
+    if(position.dist(wanderTarget) < 10) {
+      float angle = random(TWO_PI);
+      wanderTarget.set(this.position.x + 100 * cos(angle), this.position.y + 100 * sin(angle));
+    }
+    fleeOrSeek(wanderTarget, 1);
+  }
+  
+  
   //An adapted for of steering, the AI seeks and accelerates towards the player's trail. The AI also smoothly follows player once velocity matches.
   public void tailBehind(){ //adapted from: https://studres.cs.st-andrews.ac.uk/CS4303/Lectures/L9/PursueSketch/PursueSketch.pde
-    //Instead of targetting where player is going, we target where player was. Ensures we are never in the way of the player, which may be needed if player is trying to avoid obstacles for this friendly AI.
-    if(target == null){
+    //Instead of targetting where player/ai in front is going, we target where target was. Ensures we are never in the way of the player, which may be needed if player is trying to avoid obstacles for this friendly AI.
+    if(target == null && aiInFront == null){
       velocity.mult(SLOW_DOWN);
       return;
     }
-    
-    PVector tail = target.getVelocity().copy().normalize();
-    tail.mult(-(target.getRadius()*4)) ; //directly behind player.
-    tail.add(target.getPosition()) ;
-    if(position.dist(target.getPosition()) > target.getRadius()*6){ //satisfiability radius
+      
+    PVector tail;
+    PVector targetPosition;
+    PVector targetVelocity;
+    float targetRadius;
+    if(aiInFront != null){
+      tail = aiInFront.getVelocity().copy().normalize();
+      targetPosition = aiInFront.getPosition();
+      targetRadius = aiInFront.getRadius();
+      targetVelocity = aiInFront.getVelocity();
+    } else { //if no ai in front, means player is in front.
+      tail = target.getVelocity().copy().normalize();
+      targetPosition = target.getPosition();
+      targetRadius = target.getRadius();
+      targetVelocity = target.getVelocity();
+    }
+    tail.mult(-(targetRadius*4)) ; //directly behind player.
+    tail.add(targetPosition) ;
+    if(position.dist(targetPosition) > targetRadius*6){ //satisfiability radius
       fleeOrSeek(tail, 1);
-    } else if(position.dist(target.getPosition()) > target.getRadius()*4 && target.getVelocity().mag() > 0.5){ //condition only relevant if player is moving, as the AI must pursue as very dynamicaly moving target (player).
+    } else if(position.dist(targetPosition) > targetRadius*4 && targetVelocity.mag() > 0.5){ //condition only relevant if player is moving, as the AI must pursue as very dynamicaly moving target (player).
       fleeOrSeek(tail, 1);
-      velocity.setMag(target.getVelocity().mag());
+      velocity.setMag(targetVelocity.mag());
       return; //no slow down, should be smooth movement when this close.
     }
     velocity.mult(SLOW_DOWN);
   }
+  public boolean arrived() {
+    return arrived;
+  }
+  public void seekPlanet() {
+    this.seekPlanet = true;
+  }
   
+  public boolean isSeeking() {
+    return seekPlanet;
+  }
+
   public void integrate() {
     if(health == 0){
       //DESPAWN WHEN HEALTH IS 0, RESET.
     }
-    
-    tailBehind(); //first establish direction to find player.
-    avoidPlanets(); //then determine net direction that does not fly into a planet.
-    
+    if (aiInFront != null && (aiInFront.isSeeking())) {
+      setTarget(target);  //  //<>//
+      aiInFront = null;  // //<>//
+      target.setAIFollowing(this); //<>//
+    }
+    if(seekPlanet) {
+      moveToSurface();
+    }
+    else {
+      if(position.dist(player1.getPosition()) < 500 && isLost) {
+        setTarget(player1); ///////////////////////
+        isLost = false;
+      }
+      if(position.dist(player2.getPosition()) < 500 && isLost) {
+        setTarget(player2);
+        isLost = false;
+      }
+      if(position.dist(target.getPosition()) > 500) {
+        if(!isLost) {
+          isLost = true;
+          loseRecursively(this);
+          if(target.getAIBehindPlayer() == this){
+            target.setAIFollowing(null);
+          }
+          wanderTarget = target.getPosition().copy();
+        }
+        wander();
+      }
+      else {
+        tailBehind(); //first establish direction to find player.
+      }
+      avoidPlanets(); //then determine net direction that does not fly into a planet.
+    }
     //if(velocity.mag() > MAX_SPEED){
     //  //velocity.mult(MAX_SPEED/velocity.mag());
     //}
@@ -111,14 +207,31 @@ class FriendlyAI extends Body { // Similar to Player except follows steering alg
       }
       //END OF COPIED CODE
     }
-    
-    
-    
+        
     //// update position
     this.position.y += velocity.y;
     this.position.x += velocity.x;
   }
   
+  private void loseRecursively(FriendlyAI otherAI){
+    FriendlyAI temp;
+    while(otherAI != null){
+      otherAI.setAIInFront(null);
+      temp = otherAI.getAIBehind();
+      otherAI.setAIBehind(null);
+      otherAI = temp;
+    }
+  }
+  
+  
+  public void moveToSurface() {
+    if(position.dist(destination.getPosition()) - destination.getDiameter() /2 < 5) {arrived = true;}
+    PVector toPlanetCenter = PVector.sub(destination.getPosition(), position);
+    toPlanetCenter.setMag(destination.getDiameter() / 2 + 5); // Move to just outside the planet's surface
+    PVector targetPosition = PVector.add(destination.getPosition(), toPlanetCenter);
+    fleeOrSeek(targetPosition, 1); // Seek towards the calculated position on the surface
+    velocity.mult(SLOW_DOWN);
+  }
   
   public void draw() {
     CS4303SPACEHAUL.offScreenBuffer.noStroke();
@@ -153,5 +266,29 @@ class FriendlyAI extends Body { // Similar to Player except follows steering alg
   
   public float getRadius(){
     return radius;
+  }
+    
+  public float getVisibilityRadius(){
+    return visibilityRadius;
+  }
+  
+  public boolean hasATarget(){
+    return (target != null);
+  }
+  
+  public FriendlyAI getAIBehind(){
+    return aiBehind;
+  }
+  
+  public FriendlyAI getAIInFront(){
+    return aiInFront;
+  }
+  
+  public void setAIBehind(FriendlyAI ai){
+    aiBehind = ai;
+  }
+  
+  public void setAIInFront(FriendlyAI ai){
+    aiInFront = ai;
   }
 }
