@@ -1,5 +1,5 @@
 class Planet extends Body {
-  private static final float k = 20;
+  private static final float k = 15;
 
   private float angle;
   private float orbit;
