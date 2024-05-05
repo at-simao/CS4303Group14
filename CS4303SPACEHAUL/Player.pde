@@ -24,8 +24,9 @@ class Player extends Body {
   private color colour;
   
   private PVector[] trailing = new PVector[10];
-  
   private Timer respawnTimer = null;
+  private boolean hasCargo = false;
+  private Planet cargo;
   
   public Player(PVector start, int whichPlayer) {
     super(start, new PVector(0,0), 0.01);
@@ -54,10 +55,10 @@ class Player extends Body {
   }
   
   public void integrate() {
-    //shift trailing by 1 to the right
     if(respawnTimer != null){
       return; //no movement allowed until timer is spent.
     }
+    //shift trailing by 1 to the right
     PVector temp = trailing[1];
     trailing[1] = trailing[0];
     for(int i = trailing.length-1; i > 0; i--){
@@ -110,7 +111,21 @@ class Player extends Body {
     //   velocity.y = (velocity.y / abs(velocity.y)) * MAX_VELOCITY;
     // }
 
-    println(position);
+   // println(position);
+  }
+  
+  public void setCargo(Planet newCargo) {
+    hasCargo = true;    
+    this.cargo = newCargo;
+    if(newCargo == null) hasCargo = false;
+  }
+
+  public Planet getCargo() {
+     return this.cargo;
+  }
+  
+  public boolean hasCargo() {
+    return this.hasCargo;
   }
   
   private void updateOrientation(){
@@ -169,6 +184,14 @@ class Player extends Body {
     CS4303SPACEHAUL.offScreenBuffer.translate(position.x, position.y);
     //draw player sprite
     CS4303SPACEHAUL.offScreenBuffer.fill(colour);
+        // Check if player has cargo and draw outline
+    if (hasCargo) {
+        CS4303SPACEHAUL.offScreenBuffer.stroke(cargo.getColour()); // Green outline
+        CS4303SPACEHAUL.offScreenBuffer.strokeWeight(1.5);   // Set the weight of the outline
+    } else {
+        CS4303SPACEHAUL.offScreenBuffer.noStroke(); // No outline if no cargo
+    }
+    
     CS4303SPACEHAUL.offScreenBuffer.rotate(-orientation+HALF_PI);
     CS4303SPACEHAUL.offScreenBuffer.triangle(-radius, -radius, -radius, radius, radius*2, 0);
     CS4303SPACEHAUL.offScreenBuffer.fill(colour);    

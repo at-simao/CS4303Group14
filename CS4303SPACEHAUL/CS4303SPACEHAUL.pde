@@ -15,8 +15,8 @@ UI ui;
 Player player1;
 Player player2;
 
-ArrayList<FriendlyAI> escortAI = new ArrayList<FriendlyAI>(); //arraylist storing all currently active escort-mission friendly ai.
-
+ArrayList<FriendlyAI> aiList = new ArrayList<FriendlyAI>(); //arraylist storing all currently active escort-mission friendly ai.
+MissionManager missionManager;
 Camera camera1;
 Camera camera2;
 final float MAX_ZOOM_OUT = 3;
@@ -27,8 +27,7 @@ PImage player1Screen = null;
 PImage player2Screen = null;
 
 Hazards hazards = new Hazards(); //Hazards class keeps track of all meteors currently rendered and existing. Spawn as player gets near (procedurally), despawn as player moves away.
-
-
+ 
 static public PGraphics offScreenBuffer; //to refer to the buffer outside of this class, use CS4303SPACEHAUL.offScreenBuffer, use this when performing any draw methods (e.g. CS4303SPACEHAUL.offScreenBuffer.line(...))
 //This is used to render to an offscreen image, which we later draw when displaying the split-screen.
 
@@ -47,12 +46,16 @@ void setup() {
   player1 = new Player(new PVector(0,0), 1);
   player2 = new Player(new PVector(0,0), 2);
   //TO BE REMOVED
-  escortAI.add(new FriendlyAI(new PVector(0,-3000))); //NOTE: Placed here for feature testing. In actual game should not spawn immediently, only near escort mission planet. Then when player gets near, the ai follows player.
-  //escortAI.get(0).setTarget(player1);
-  //TO BE REMOVED
   map = new Map();
+  missionManager = new MissionManager();
   int numPlanets = (int) random(3, 7);
   map.generate(numPlanets);
+  
+  // temp first mission
+  ArrayList<Planet> randomPlanets = new ArrayList<Planet>();
+  randomPlanets.add(map.planets.get(1));
+  missionManager.addMission(new CargoMission(randomPlanets, map.planets.get(0)));
+  
 }
  
 void keyPressed() {
@@ -72,6 +75,8 @@ void keyPressed() {
   if(key == 'X' || key == 'x') player1ZoomOut = false;
   if(key == 'C' || key == 'c') player2ZoomOut = true;
   if(key == 'V' || key == 'v') player2ZoomOut = false;
+  if(key == 'E' || key == 'e') missionManager.attemptAction(player1);
+  if(key == '1') missionManager.attemptAction(player2);
 }
 
 void keyReleased() {
@@ -137,14 +142,14 @@ void physicsAndLogicUpdate() {
   applyGravityToPlayer(player2);
   player1.integrate();
   player2.integrate();
-  for(FriendlyAI friend : escortAI){
+  for(FriendlyAI friend : aiList){
     friend.integrate();
   }
   map.integrate();
   hazards.generate(player1, player2, 1);
   hazards.generate(player1, player2, 2);
   hazards.deleteHazard(player1, player2);
-  hazards.integrate(player1, player2, escortAI);
+  hazards.integrate(player1, player2, aiList);
   friendlyAILogicUpdate();
 }
 
@@ -168,7 +173,7 @@ void draw() {
     } else {
       camera2.setZoom(3 / min((1+0.03*player2.getVelocity().mag()), MAX_ZOOM_OUT)); //zoom out effect to give feeling to player of FTL travel.
     }
-    player2Screen = playerScreenDraw(player2, camera2); //write player 1's screen to buffer, outputs to an image.
+  player2Screen = playerScreenDraw(player2, camera2); //write player 1's screen to buffer, outputs to an image.
     //This draws to the screen.
     translate(0, heightUIOffset);
     imageMode(CORNER);
@@ -191,7 +196,31 @@ void draw() {
   player1.updateRespawnTimer(); //update timer is logic but is an exception. because we must compare the timer every frame, we cannot wait to compare it only after the player unpauses.
   player2.updateRespawnTimer();
   ui.draw();
+  updateMission();
   //end of draw to screen.
+}
+
+void updateMission() {
+  missionManager.updateMissions();
+  //System.out.println(currentMission.isCompleted());
+  if(missionManager.checkForNewMission()) {
+    boolean missionType = (random(0,1) > 0.5);
+    ArrayList<Planet> randomPlanets = new ArrayList<Planet>();
+    int numPlanets = (int) random(1, 5);
+    for(int i = 0; i < numPlanets; i++) {
+      randomPlanets.add(map.planets.get((int)random(1,map.planets.size())));
+    }
+
+
+    int destinationIndex = 0;
+    
+    if(missionType) {
+      missionManager.addMission(new CargoMission(randomPlanets, map.planets.get(destinationIndex)));
+    }
+    else {
+      missionManager.addMission(new EscortMission(randomPlanets, map.planets.get(destinationIndex)));
+    }
+  }
 }
 
 //Draws every element in the world, from the current player's perspective. No physics calculations done here.
@@ -212,7 +241,7 @@ PImage playerScreenDraw(Player player, Camera cameraForPlayer) {
   
   player1.draw();
   player2.draw();
-  for(FriendlyAI friend : escortAI){
+  for(FriendlyAI friend : aiList){
     friend.draw();
   }
   
@@ -226,27 +255,26 @@ PImage playerScreenDraw(Player player, Camera cameraForPlayer) {
   offScreenBuffer.endDraw();
   return offScreenBuffer.get(); //returns this player's half of the screen as an image.
 }
-
 private void despawnDeadAI(){
-  for(int i = 0; i < escortAI.size(); i++){
-    if(escortAI.get(i).getHealth() <= 0){
-      escortAI.remove(i);
+  for(int i = 0; i < aiList.size(); i++){
+    if(aiList.get(i).getHealth() <= 0){
+      aiList.remove(i);
       i--;
     }
   }
 }
 
 private void friendlyAILogicUpdate(){
-  for(int i = 0; i < escortAI.size(); i++){
-    if(escortAI.get(i).getHealth() <= 0){
-      escortAI.remove(i);
+  for(int i = 0; i < aiList.size(); i++){
+    if(aiList.get(i).getHealth() <= 0){
+      aiList.remove(i);
       i--; //despawn dead AI.
       continue;
     }
-    if(!escortAI.get(i).hasATarget()){
-      boolean result = lineOfSight(escortAI.get(i), player1);
+    if(!aiList.get(i).hasATarget()){
+      boolean result = lineOfSight(aiList.get(i), player1);
       if(!result){ //if no line of sight to player 1, check for player 2
-        lineOfSight(escortAI.get(i), player2);
+        lineOfSight(aiList.get(i), player2);
       }
     }
   }
