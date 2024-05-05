@@ -162,10 +162,6 @@ void drawArrow(PVector playerPosition, PVector direction, color colour) {
 
 //Method for updating physics of game-world. Currently updates gravity of players.
 void physicsAndLogicUpdate() {  
-  // // player1.gravitationalPull(calculateGravityByBody(player1.position, player2.position)); 
-  // applyGravityToPlayer(player1);
-  // // player2.gravitationalPull(calculateGravityByBody(player2.position, player1.position));
-  // applyGravityToPlayer(player2);
   map.integrate();
   forceRegistry.updateForces();
 
@@ -404,11 +400,17 @@ public void resetFromGameOver(){ //MIGHT NEED TO BE EDITED - some temp code incl
   map = new Map();
   camera1 = new Camera(0, 0, 3.0f, heightUIOffset);
   camera2 = new Camera(0, 0, 3.0f, heightUIOffset);
-  player1 = new Player(new PVector(0,0), 1);
-  player2 = new Player(new PVector(0,0), 2);
+  player1 = new Player(new PVector(650,0), 1);
+  player2 = new Player(new PVector(0,650), 2);
   missionManager = new MissionManager();
   int numPlanets = (int) random(3, 7);
   map.generate(numPlanets);
+  forceRegistry = new ForceRegistry();
+  for (Planet planet : map.planets) {
+    Gravity planetGravity = new Gravity(planet);
+    forceRegistry.add(player1, planetGravity);
+    forceRegistry.add(player2, planetGravity);
+  }
   
   // temp first mission
   ArrayList<Planet> randomPlanets = new ArrayList<Planet>();

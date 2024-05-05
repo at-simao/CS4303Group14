@@ -19,7 +19,7 @@ class Meteor extends Body{ //small bodies that attract one another and collide w
   public void integratePerMeteor(ArrayList<Meteor> meteors){
     for (Meteor meteor : meteors) {
       if(position.dist(meteor.getPosition()) < minimumDistanceForGravity){
-        gravitationalPull(meteor);
+        // gravitationalPull(meteor);
       }
     }
   }

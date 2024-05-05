@@ -88,9 +88,6 @@ class Player extends Body {
       if (orientation > PI) orientation -= 2*PI ;
       else if (orientation < -PI) orientation += 2*PI ;
       
-      //move a bit towards velocity:
-      // turn vel into orientation
-      
       // Will take a frame extra at the PI boundary
       float orIncrement = PI/16;
       if (abs(targetOrientation - orientation) <= orIncrement) {
@@ -122,8 +119,6 @@ class Player extends Body {
     // if (abs(velocity.y) > MAX_VELOCITY) {
     //   velocity.y = (velocity.y / abs(velocity.y)) * MAX_VELOCITY;
     // }
-
-   // println(position);
   }
   
   public void setCargo(Planet newCargo) {
