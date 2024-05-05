@@ -7,6 +7,7 @@ class Hazards { //Maintains all hazards on map and handles collision logic for e
   private int MAX_METEORS = 40;
   
   private float chanceOfNewMeteor = 0.96; //note that this probability is twice as high as current value, as attempt to generate meteors twice per frame.
+  private float chanceChangePerWave = 0.925; //note that this probability is twice as high as current value, as attempt to generate meteors twice per frame.
   
   private float distanceOfSpawn = 600;
   
@@ -212,5 +213,10 @@ class Hazards { //Maintains all hazards on map and handles collision logic for e
   private PVector returnReflectionVector(PVector incidence, PVector normal){
     float angleOfIncidence = normal.dot(incidence);
     return normal.mult(2*angleOfIncidence).sub(incidence).normalize().copy();
+  }
+  
+  public void updateChanceOfMeteors(){
+    chanceOfNewMeteor *= chanceChangePerWave;
+    MAX_METEORS += 10;
   }
 }

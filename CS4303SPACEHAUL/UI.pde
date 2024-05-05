@@ -6,6 +6,7 @@ class UI{
   UI(float heightUIOffset){
     this.heightUIOffset = heightUIOffset;
     timer = new Timer(60000, new PVector(width*0.5,heightUIOffset*0.5), 35);
+    newWaveMessageTimer = new Timer(1500, new PVector(width*0.5,heightUIOffset*0.5), 35);
   }
   
   void draw() {
@@ -15,16 +16,16 @@ class UI{
     float xStart = 0.01 * width;
     float yStart = heightUIOffset - 10;
     float spacingY = heightUIOffset / 3; // 
-   
+    if(CS4303SPACEHAUL.restartAnimationFlag){
+      return;
+    }
     for (Mission mission : missionManager.getActiveMissions()) {
       String typeText = mission.getType() ? "CARGO" : "ESCORT";
       fill(250);
       textSize(heightUIOffset / 4 - 10);
       textAlign(LEFT);
       text(typeText, xStart, yStart);
-      if(CS4303SPACEHAUL.restartAnimationFlag){
-        return;
-      }
+      
       ArrayList<Integer> pickupPlanets = mission.getUiPlanets();
       ArrayList<Integer> destinationPlanets = mission.getUiDPlanets();
       float x = xStart + textWidth(typeText) + 20;

@@ -216,6 +216,7 @@ void draw() {
       newWaveTarget();
       ui.setNewWaveTimer(2,0); //reset timer.
       newWave = true;
+      hazards.updateChanceOfMeteors();
     } else {
       //GAME OVER.
       wave = 1;
@@ -369,6 +370,7 @@ public void resetFromGameOver(){ //MIGHT NEED TO BE EDITED - some temp code incl
   gameOver = false;
   score = 0;
   scoreNeeded = FIRST_SCORE_NEEDED;
+  ui.updateOldScoreTarget(0);
   wave = 1;
   ui.setNewWaveTimer(2, 0); 
   map = new Map();

@@ -135,24 +135,22 @@ class Player extends Body {
   }
   
   private void updateThrust(){
+    PVector temp = new PVector(0,0);
     if(thrustLeft && thrustRight){
       velocity.mult(SLOW_DOWN);
       return;
     } else if (thrustRight){
-      velocity.y += sin(PI)*THRUST_INCREMENT; //vertical component of unit circle
-      velocity.x += cos(PI)*THRUST_INCREMENT; //horizontal component
+      temp.x = -1; //horizontal component
     } else if (thrustLeft){
-      velocity.y += sin(0)*THRUST_INCREMENT; //vertical component of unit circle
-      velocity.x += cos(0)*THRUST_INCREMENT; //horizontal component
+      temp.x = 1; //horizontal component
     }
     if(thrustUp){
-      velocity.y -= sin(HALF_PI)*THRUST_INCREMENT; //vertical component of unit circle
-      velocity.x -= cos(HALF_PI)*THRUST_INCREMENT; //horizontal component
-      //effect is vector added to velocity with magnitude THRUST_INCREMENT, pointing in direction of orientation.
+      temp.y = -1; //horizontal component
     } else if (thrustDown){
-      velocity.y += sin(HALF_PI)*THRUST_INCREMENT;
-      velocity.x += cos(HALF_PI)*THRUST_INCREMENT;
+      temp.y = 1; //horizontal component
     }
+    temp.normalize().mult(THRUST_INCREMENT);
+    velocity.add(temp);
     
     //we do not reset velocity due to the lack of drag force in space. Only slow down if player presses thurstLeft and thrustRight at the same time.
   }
@@ -160,6 +158,7 @@ class Player extends Body {
   public void draw() {
     CS4303SPACEHAUL.offScreenBuffer.noStroke();
     if(respawnTimer != null){
+      drawUpTo = 0;
       if(respawnTimer.outOfTime()){
         respawnTimer = null;
         health = MAX_HEALTH;
