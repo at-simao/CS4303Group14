@@ -15,7 +15,7 @@ class Meteor extends Body{ //small bodies that attract one another and collide w
   //Meteors are attracted to all moving bodies, including other meteors. Must calculate respective pull from n^2 combinations.
   public void integratePerMeteor(ArrayList<Meteor> meteors){
     for (Meteor meteor : meteors) {
-      gravitationalPull(meteor);
+      // gravitationalPull(meteor);
     }
   }
   

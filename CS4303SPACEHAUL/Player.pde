@@ -26,7 +26,7 @@ class Player extends Body {
   private PVector[] trailing = new PVector[10];
   
   public Player(PVector start, int whichPlayer) {
-    super(start, new PVector(0,0), 0.01);
+    super(start, new PVector(0,0), 0.1);
     if(whichPlayer == 1){
       colour = color(255,0,0);
     } else {
@@ -35,6 +35,17 @@ class Player extends Body {
     for(int i = 0; i < trailing.length; i++){
       trailing[i] = new PVector(start.x, start.y, orientation); //overloading PVector semantics to store x,y,orientation as 3D vector.
     }
+  }
+
+  public void updateVelocity() {
+    PVector resultingAcceleration = forceAccumulator.get();
+    resultingAcceleration.mult(invMass);
+    velocity.add(resultingAcceleration);
+
+    updateThrust();
+
+    forceAccumulator.x = 0;
+    forceAccumulator.y = 0;
   }
   
   public void integrate() {
@@ -49,9 +60,8 @@ class Player extends Body {
     }
     trailing[0] = new PVector(position.x, position.y, orientation);
     
-    updateOrientation(); //defunct currently
-    //update thrust (pressing W,A,S,D / UP,LEFT,DOWN,RIGHT)
-    updateThrust();
+    // updateOrientation(); //defunct currently
+    // update thrust (pressing W,A,S,D / UP,LEFT,DOWN,RIGHT)
     
     if(velocity.mag() != 0){ //if 0, no need to update orientation, keep facing same direction from before standing-still.
       float targetOrientation = atan2(velocity.x, velocity.y); //we want character to face movement

@@ -2,7 +2,8 @@
 boolean player1ZoomOut = false;
 boolean player2ZoomOut = false;
 final float ZOOM_OUT_VALUE = 0.3;
-//
+
+ForceRegistry forceRegistry;
 
 Player player1;
 Player player2;
@@ -33,8 +34,8 @@ void setup() {
   // set up two cameras, one for each player.
   camera1 = new Camera(0, 0, 3.0f);
   camera2 = new Camera(0, 0, 3.0f);
-  player1 = new Player(new PVector(0,0), 1);
-  player2 = new Player(new PVector(0,0), 2);
+  player1 = new Player(new PVector(650,0), 1);
+  player2 = new Player(new PVector(0,650), 2);
   //TO BE REMOVED
   escortAI.add(new FriendlyAI(new PVector(0,800))); //NOTE: Placed here for feature testing. In actual game should not spawn immediently, only near escort mission planet. Then when player gets near, the ai follows player.
   escortAI.get(0).setTarget(player1);
@@ -42,8 +43,15 @@ void setup() {
   map = new Map();
   int numPlanets = (int) random(3, 7);
   map.generate(numPlanets);
+
+  forceRegistry = new ForceRegistry();
+  for (Planet planet : map.planets) {
+    Gravity planetGravity = new Gravity(planet);
+    forceRegistry.add(player1, planetGravity);
+    forceRegistry.add(player2, planetGravity);
+  }
 }
- 
+
 void keyPressed() {
   if(key == 'w' || key == 'W') player1.thrustUp = true;
   if(key == 's' || key == 'S') player1.thrustDown = true;
@@ -81,10 +89,10 @@ void drawGrid() { //temporary, can be removed once we have an actual map.
 }
 
 void drawArrows(PVector playerPosition) {
-  PVector arrowDirection = PVector.sub(map.star.getPosition(), playerPosition);
-  drawArrow(playerPosition, arrowDirection, map.star.colour);
+  // PVector arrowDirection = PVector.sub(map.star.getPosition(), playerPosition);
+  // drawArrow(playerPosition, arrowDirection, map.star.colour);
   for (Planet planet : map.planets) {
-    arrowDirection = PVector.sub(planet.getPosition(), playerPosition);
+    PVector arrowDirection = PVector.sub(planet.getPosition(), playerPosition);
     drawArrow(playerPosition, arrowDirection, planet.colour);
   }
 }
@@ -116,27 +124,41 @@ void drawArrow(PVector playerPosition, PVector direction, color colour) {
 
 //Method for updating physics of game-world. Currently updates gravity of players.
 void physicsAndLogicUpdate() {  
-  // player1.gravitationalPull(calculateGravityByBody(player1.position, player2.position)); 
-  applyGravityToPlayer(player1);
-  // player2.gravitationalPull(calculateGravityByBody(player2.position, player1.position));
-  applyGravityToPlayer(player2);
+  // // player1.gravitationalPull(calculateGravityByBody(player1.position, player2.position)); 
+  // applyGravityToPlayer(player1);
+  // // player2.gravitationalPull(calculateGravityByBody(player2.position, player1.position));
+  // applyGravityToPlayer(player2);
+  map.integrate();
+  forceRegistry.updateForces();
+
+  player1.updateVelocity();
+  player2.updateVelocity();
+  for (Planet planet : map.planets) {
+    if (CollisionUtil.checkCollision(player1, planet)) {
+      CollisionUtil.handleCollision(player1, planet);
+      player1.updateVelocity();
+    }
+    if (CollisionUtil.checkCollision(player2, planet)) {
+      CollisionUtil.handleCollision(player2, planet);
+      player2.updateVelocity();
+    }
+  }
   player1.integrate();
   player2.integrate();
+
   for(FriendlyAI friend : escortAI){
     friend.integrate();
   }
-  map.integrate();
+
   hazards.generate(player1, player2, 1);
   hazards.generate(player1, player2, 2);
   hazards.deleteHazard(player1, player2);
   hazards.integrate(player1, player2, escortAI);
 }
 
-void applyGravityToPlayer(Player player){
-  // in here would be gravity calculations that would be the same for both players e.g. gravity by planets.
-}
-
-
+// void applyGravityToPlayer(Player player){
+//   // in here would be gravity calculations that would be the same for both players e.g. gravity by planets.
+// }
 
 void draw() {
   physicsAndLogicUpdate(); //Update physics & positions once. Then display twice, once from player 1's perspective, second from player 2's.
