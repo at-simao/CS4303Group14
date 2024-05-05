@@ -1,4 +1,6 @@
-class Planet {
+class Planet extends Body {
+  private static final float k = 20;
+
   private float angle;
   private float orbit;
   private float period;
@@ -7,33 +9,45 @@ class Planet {
   public color colour;
   private boolean missionPlanet = false;
 
-  public Planet(float radius, float orbit, float period, color colour) {
-    this.angle = random(TWO_PI);
-    this.orbit = orbit;
-    this.period = period;
+  public Planet(float radius, float orbit, float angle, float period, color colour) {
+      super(new PVector(orbit * cos(angle), orbit * sin(angle)), new PVector(0,0));
 
-    this.diameter = 2 * radius;
-    this.colour = colour;
+      this.invMass = k / (radius * radius);
+
+      this.angle = angle;
+      this.orbit = orbit;
+      this.period = period;
+
+      this.diameter = 2f * radius;
+      this.colour = colour;
   }
 
   public void setMissionPlanet(boolean newMissionPlanet) {
     missionPlanet = newMissionPlanet;
   }
 
-  PVector getPosition() {
-    float x = orbit * cos(angle);
-    float y = orbit * sin(angle);
+  public PVector getPosition() {
+      return position;
+  }
 
-    return new PVector(x, y);
+  public float getRadius() {
+      return diameter / 2f;
+  }
+  
+  public float getDiameter() {
+      return diameter;
   }
 
   public void integrate() {
-    angle += TWO_PI / period;
-    angle %= TWO_PI;
-  }
-  
-  public float getDiameter(){
-    return diameter;
+      this.angle += TWO_PI / period;
+      this.angle %= TWO_PI;
+
+      this.position.x = orbit * cos(angle);
+      this.position.y = orbit * sin(angle);
+
+      float orbitalSpeed = 2 * PI * orbit / period;
+      this.velocity.x = -orbitalSpeed * sin(angle); // Cosine term for x-component of tangential velocity
+      this.velocity.y = orbitalSpeed * cos(angle);  // Sine term for y-component of tangential velocity
   }
 
   public color getColour() {
@@ -66,16 +80,14 @@ class Planet {
   }
   
   private void drawPickup() {
-        CS4303SPACEHAUL.offScreenBuffer.stroke(255, 255, 255); // Yellow color for visibility
-        CS4303SPACEHAUL.offScreenBuffer.noFill();
-        float radius = diameter;  // Slightly larger than the planet's diameter
-        float angleStep = TWO_PI / 60;
-        for (float angle = 0; angle < TWO_PI; angle += angleStep) {
-            float x = cos(angle) * radius;
-            float y = sin(angle) * radius;
-            CS4303SPACEHAUL.offScreenBuffer.point(x, y);
-        }
+    CS4303SPACEHAUL.offScreenBuffer.stroke(255, 255, 255); // Yellow color for visibility
+    CS4303SPACEHAUL.offScreenBuffer.noFill();
+    float radius = diameter;  // Slightly larger than the planet's diameter
+    float angleStep = TWO_PI / 60;
+    for (float angle = 0; angle < TWO_PI; angle += angleStep) {
+        float x = cos(angle) * radius;
+        float y = sin(angle) * radius;
+        CS4303SPACEHAUL.offScreenBuffer.point(x, y);
     }
-  
-  
+  }
 }

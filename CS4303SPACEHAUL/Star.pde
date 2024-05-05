@@ -1,4 +1,4 @@
-class Star{
+class Star {
   PVector position;
   float radius = 1.5;
   

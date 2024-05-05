@@ -1,12 +1,15 @@
-class FriendlyAI extends Body { //Similar to Player except follows steering algorithms for movement. Vulnerable to hazards and follows player once found.
+class FriendlyAI extends Body { // Similar to Player except follows steering algorithms for movement. Vulnerable to hazards and follows player once found.
   private final float MAX_SPEED = 30;
-  
+
   private float health = 100;
   private final float MAX_HEALTH = 100;
   private float orientation = 0.0;
   private final float SLOW_DOWN = 0.7; //drag
-  private final float radius = 4;  
-  private color colour;  
+  
+  private final float radius = 4;
+  
+  private color colour;
+  
   Player target = null;
   FriendlyAI aiBehind = null;
   FriendlyAI aiInFront = null;

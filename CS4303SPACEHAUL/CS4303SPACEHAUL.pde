@@ -19,6 +19,8 @@ float heightUIOffset;
 UI ui;
 
 
+ForceRegistry forceRegistry;
+
 Player player1;
 Player player2;
 
@@ -52,13 +54,20 @@ void setup() {
   // set up two cameras, one for each player.
   camera1 = new Camera(0, 0, 3.0f, heightUIOffset);
   camera2 = new Camera(0, 0, 3.0f, heightUIOffset);
-  player1 = new Player(new PVector(0,0), 1);
-  player2 = new Player(new PVector(0,0), 2);
+  player1 = new Player(new PVector(650,0), 1);
+  player2 = new Player(new PVector(0,650), 2);
   //TO BE REMOVED
   map = new Map();
   missionManager = new MissionManager();
   int numPlanets = (int) random(3, 7);
   map.generate(numPlanets);
+
+  forceRegistry = new ForceRegistry();
+  for (Planet planet : map.planets) {
+    Gravity planetGravity = new Gravity(planet);
+    forceRegistry.add(player1, planetGravity);
+    forceRegistry.add(player2, planetGravity);
+  }
   
   // temp first mission
   ArrayList<Planet> randomPlanets = new ArrayList<Planet>();
@@ -68,7 +77,7 @@ void setup() {
   missionManager.addMission(new CargoMission(randomPlanets, randomPlanets2));
   
 }
- 
+
 void keyPressed() {
   if(gameOver){
     if(key == 'r' || key == 'R'){
@@ -119,10 +128,10 @@ void drawGrid() { //temporary, can be removed once we have an actual map.
 }
 
 void drawArrows(PVector playerPosition) {
-  PVector arrowDirection = PVector.sub(map.star.getPosition(), playerPosition);
-  drawArrow(playerPosition, arrowDirection, map.star.colour);
+  // PVector arrowDirection = PVector.sub(map.star.getPosition(), playerPosition);
+  // drawArrow(playerPosition, arrowDirection, map.star.colour);
   for (Planet planet : map.planets) {
-    arrowDirection = PVector.sub(planet.getPosition(), playerPosition);
+    PVector arrowDirection = PVector.sub(planet.getPosition(), playerPosition);
     drawArrow(playerPosition, arrowDirection, planet.colour);
   }
 }
@@ -154,10 +163,21 @@ void drawArrow(PVector playerPosition, PVector direction, color colour) {
 
 //Method for updating physics of game-world. Currently updates gravity of players.
 void physicsAndLogicUpdate() {  
-  // player1.gravitationalPull(calculateGravityByBody(player1.position, player2.position)); 
-  applyGravityToPlayer(player1);
-  // player2.gravitationalPull(calculateGravityByBody(player2.position, player1.position));
-  applyGravityToPlayer(player2);
+  map.integrate();
+  forceRegistry.updateForces();
+
+  player1.updateVelocity();
+  player2.updateVelocity();
+  for (Planet planet : map.planets) {
+    if (CollisionUtil.checkCollision(player1, planet)) {
+      CollisionUtil.handleCollision(player1, planet);
+      player1.updateVelocity();
+    }
+    if (CollisionUtil.checkCollision(player2, planet)) {
+      CollisionUtil.handleCollision(player2, planet);
+      player2.updateVelocity();
+    }
+  }
   player1.integrate();
   player2.integrate();
   for(FriendlyAI friend : aiList){
@@ -385,11 +405,17 @@ public void resetFromGameOver(){ //MIGHT NEED TO BE EDITED - some temp code incl
   map = new Map();
   camera1 = new Camera(0, 0, 3.0f, heightUIOffset);
   camera2 = new Camera(0, 0, 3.0f, heightUIOffset);
-  player1 = new Player(new PVector(0,0), 1);
-  player2 = new Player(new PVector(0,0), 2);
+  player1 = new Player(new PVector(650,0), 1);
+  player2 = new Player(new PVector(0,650), 2);
   missionManager = new MissionManager();
   int numPlanets = (int) random(3, 7);
   map.generate(numPlanets);
+  forceRegistry = new ForceRegistry();
+  for (Planet planet : map.planets) {
+    Gravity planetGravity = new Gravity(planet);
+    forceRegistry.add(player1, planetGravity);
+    forceRegistry.add(player2, planetGravity);
+  }
   
   // temp first mission
   ArrayList<Planet> randomPlanets = new ArrayList<Planet>();
