@@ -1,23 +1,71 @@
 class UI{
   private float heightUIOffset = 0;
   private Timer timer;
-  private float missionsDisplayed = 0;
+  private color  destinationPlanetColour;
+  private ArrayList<Integer> pickupPlanetColours;
+  private ArrayList<Integer> planetOutlines;
+  private boolean missionType = true;  //true for cargo false for escort
   private float lastTargetScore = 0;
-  
+
   UI(float heightUIOffset){
     this.heightUIOffset = heightUIOffset;
     timer = new Timer(60000, new PVector(width*0.5,heightUIOffset*0.5), 35);
+    pickupPlanetColours = new ArrayList<Integer>();
+    planetOutlines = new ArrayList<Integer>();
   }
+
+  //public void removeMissionDisplay(int id) {
+  //  missionDisplays.removeIf(mission -> mission.id == id);
+  //}
+  //public void setMissionColours(ArrayList<Planet> pickupPlanets, color destinationColour, boolean type, int id) {
+  //  removeMissionDisplay(id);  // Remove existing display with the same ID if it exists
+  //  missionDisplays.add(new MissionDisplay(pickupPlanets, destinationColour, type, id));
+  //}
   
+  // Change colour for mission indicator to show delivered
+  public color getFadedColor(color originalColor) {
+    // Slightly fade colour 
+    float r = red(originalColor) * 0.8;
+    float g = green(originalColor) * 0.8;
+    float b = blue(originalColor) * 0.8;
+    return color(r, g, b);
+  }
+
+  // Update delivered missions
+  public void updateCargo(color colour) {
+    int index = pickupPlanetColours.indexOf(Integer.valueOf((int)colour)); // Find the index of the original colour to keep ordering same
+    if (index != -1) {
+        pickupPlanetColours.remove(index); // Remove the original colour at that index
+        pickupPlanetColours.add(index, Integer.valueOf((int)getFadedColor(colour))); // Add the faded colour at the same index
+    }
+  }
   void draw() {
     stroke(180);
     fill(0);
     noStroke();
     rect(0, 0, width, heightUIOffset);
-    fill(250);
-    textSize(70);
-    textAlign(LEFT);
-    text("MISSIONS: []", 0.01*width, 0.70*heightUIOffset); //to be filled in when we have missions object ready.
+    float xStart = 0.01 * width;
+    float yStart = heightUIOffset - 10;
+    float spacingY = heightUIOffset / 3; // 
+   
+    for (Mission mission : missionManager.getActiveMissions()) {
+      String typeText = mission.getType() ? "CARGO" : "ESCORT";
+      fill(250);
+      textSize(heightUIOffset / 4 - 10);
+      textAlign(LEFT);
+      text(typeText, xStart, yStart);
+
+      ArrayList<Planet> pickupPlanets = mission.getPickupPlanets();
+      float x = xStart + textWidth(typeText) + 20;
+
+      for (Planet planet : pickupPlanets) {
+        fill(planet.getColour());
+        stroke(255);
+        ellipse(x, yStart - textAscent() / 2, heightUIOffset * 0.2, heightUIOffset * 0.2); // 
+        x += heightUIOffset * 0.2; // Space between planets
+      }
+      yStart -= spacingY; // Spacing between mission displays
+    }
     textAlign(CENTER);
     if(!timer.outOfTime()){
       PVector timeRemaining = timer.getMinAndSecFromTimer();
@@ -66,7 +114,7 @@ class UI{
   public void setNewWaveTimer(int minutes, int seconds){
     timer.setTimer(minutes, seconds);
   }
-  
+    
   public void updateOldScoreTarget(float oldTarget){
     lastTargetScore = oldTarget;
   }
