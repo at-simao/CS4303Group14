@@ -35,6 +35,7 @@ class Meteor extends Body{ //small bodies that attract one another and collide w
   public void draw() {
     //orientation
     CS4303SPACEHAUL.offScreenBuffer.pushMatrix();
+    CS4303SPACEHAUL.offScreenBuffer.noStroke();
     CS4303SPACEHAUL.offScreenBuffer.translate(position.x, position.y);
     CS4303SPACEHAUL.offScreenBuffer.rotate(orientation);
     CS4303SPACEHAUL.offScreenBuffer.fill(175, 80, 0);

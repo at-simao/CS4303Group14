@@ -85,6 +85,6 @@ abstract class Mission {
     
         int totalScore = (int)(100 + planetScore + distanceScore * missionMulti);
         
-        score= totalScore;
+        score= floor(CS4303SPACEHAUL.scoreMultiplier(totalScore));
     }
 }

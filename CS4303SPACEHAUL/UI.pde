@@ -1,6 +1,7 @@
 class UI{
   private float heightUIOffset = 0;
   private Timer timer;
+  private Timer newWaveMessageTimer;
   private color  destinationPlanetColour;
   private ArrayList<Integer> pickupPlanetColours;
   private ArrayList<Integer> planetOutlines;
@@ -10,6 +11,7 @@ class UI{
   UI(float heightUIOffset){
     this.heightUIOffset = heightUIOffset;
     timer = new Timer(60000, new PVector(width*0.5,heightUIOffset*0.5), 35);
+    newWaveMessageTimer = new Timer(1500, new PVector(width*0.5,heightUIOffset*0.5), 35);
     pickupPlanetColours = new ArrayList<Integer>();
     planetOutlines = new ArrayList<Integer>();
   }
@@ -40,14 +42,15 @@ class UI{
     }
   }
   void draw() {
-    stroke(180);
     fill(0);
     noStroke();
     rect(0, 0, width, heightUIOffset);
     float xStart = 0.01 * width;
     float yStart = heightUIOffset - 10;
     float spacingY = heightUIOffset / 3; // 
-   
+    if(CS4303SPACEHAUL.restartAnimationFlag){
+      return;
+    }
     for (Mission mission : missionManager.getActiveMissions()) {
       String typeText = mission.getType() ? "CARGO" : "ESCORT";
       fill(250);
@@ -88,10 +91,27 @@ class UI{
       text("Press [SPACE] to continue!", 0.75*width, height*0.5); //paused text display
     }
     if(CS4303SPACEHAUL.newWave){
+      if(newWaveMessageTimer.outOfTime()){
+        newWaveMessageTimer = new Timer(1500, new PVector(width*0.5,heightUIOffset*0.5), 35);
+        CS4303SPACEHAUL.newWave = false;
+      } else {
+        newWaveMessageTimer.updateTimer();
+        stroke(0);
+        textSize(60);
+        text("NEW WAVE!", 0.25*width, height*0.45); //new wave text display
+        text("NEW WAVE!", 0.75*width, height*0.45); //new wave text display
+      }
+    }
+    if(CS4303SPACEHAUL.gameOver){
       stroke(0);
       textSize(60);
-      text("NEW WAVE!", 0.25*width, height*0.45); //new wave text display
-      text("NEW WAVE!", 0.75*width, height*0.45); //new wave text display
+      text("GAME OVER!", 0.25*width, height*0.45); //paused text display
+      textSize(50);
+      text("Press [R] to restart in a new solar system.", 0.25*width, height*0.5); //game over text display
+      textSize(60);
+      text("GAME OVER!", 0.75*width, height*0.45); //paused text display
+      textSize(50);
+      text("Press [R] to restart in a new solar system.", 0.75*width, height*0.5);  //game over text display
     }
     textAlign(RIGHT);
     textSize(40);
@@ -103,7 +123,9 @@ class UI{
     text(scoreText, 0.98*width, 0.4*heightUIOffset); //score value.
     fill(250);
     text("TARGET: " + scoreNeededText, 0.98*width, 0.8*heightUIOffset); //target score to enter next wave display
-    timer.updateTimer();
+    if(!CS4303SPACEHAUL.restartAnimationFlag){
+      timer.updateTimer();
+    }
     //timer.draw();
   }
   

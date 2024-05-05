@@ -2,15 +2,22 @@
 boolean player1ZoomOut = false;
 boolean player2ZoomOut = false;
 final float ZOOM_OUT_VALUE = 0.3;
-// WAVE & SCORE
+// WAVE & SCORE & GAME OVER
 static int wave = 1;
-static float score = 0.0;
-static float scoreNeeded = 1000;
+static int score = 0;
+static final int FIRST_SCORE_NEEDED = 1000;
+static int scoreNeeded = FIRST_SCORE_NEEDED;
+static boolean gameOver = false;
+static boolean restartAnimationFlag = true;
+static boolean restartAnimationHalfWayFlag = false;
+private final int RESTART_LENGTH = 1500;
+private Timer restartAnimationTimer = new Timer(RESTART_LENGTH, new PVector(0,0), 35);
 // UI
 static boolean isPaused = false;
 static boolean newWave = false;
 float heightUIOffset;
 UI ui;
+
 
 Player player1;
 Player player2;
@@ -38,7 +45,7 @@ void setup() {
   noSmooth();
   heightUIOffset = height*0.15;
   ui = new UI(heightUIOffset);
-  ui.setNewWaveTimer(1, 5); //DEMO TIMER, this is meant to be changed when we actually implement a wave system.
+  ui.setNewWaveTimer(2, 0); //DEMO TIMER, this is meant to be changed when we actually implement a wave system.
   
   // set up two cameras, one for each player.
   camera1 = new Camera(0, 0, 3.0f, heightUIOffset);
@@ -59,7 +66,14 @@ void setup() {
 }
  
 void keyPressed() {
-  if(key == ' '){
+  if(gameOver){
+    if(key == 'r' || key == 'R'){
+      gameOver = false;
+      restartAnimationFlag = true;
+    }
+    return; //no inputs allowed except restart
+  }
+  if(key == ' ' && !restartAnimationFlag){
     isPaused = !isPaused;
     return;
   } 
@@ -151,18 +165,15 @@ void physicsAndLogicUpdate() {
   hazards.deleteHazard(player1, player2);
   hazards.integrate(player1, player2, aiList);
   friendlyAILogicUpdate();
+  updateMission();
 }
 
 void applyGravityToPlayer(Player player){
   // in here would be gravity calculations that would be the same for both players e.g. gravity by planets.
 }
 
-
-
-void draw() {
-  if(!isPaused) {
-    physicsAndLogicUpdate(); //Update physics & positions once. Then display twice, once from player 1's perspective, second from player 2's.
-    if(player1ZoomOut){
+void drawUpdate(){
+  if(player1ZoomOut){
       camera1.setZoom(ZOOM_OUT_VALUE); //debug feature: zoom out to better see solar system. Press Z to activate, and X to deactivate.
     } else {
       camera1.setZoom(3 / min((1+0.03*player1.getVelocity().mag()), MAX_ZOOM_OUT)); //zoom out effect to give feeling to player of FTL travel.
@@ -173,7 +184,7 @@ void draw() {
     } else {
       camera2.setZoom(3 / min((1+0.03*player2.getVelocity().mag()), MAX_ZOOM_OUT)); //zoom out effect to give feeling to player of FTL travel.
     }
-  player2Screen = playerScreenDraw(player2, camera2); //write player 1's screen to buffer, outputs to an image.
+    player2Screen = playerScreenDraw(player2, camera2); //write player 1's screen to buffer, outputs to an image.
     //This draws to the screen.
     translate(0, heightUIOffset);
     imageMode(CORNER);
@@ -192,11 +203,42 @@ void draw() {
     fill(255);
     stroke(0);
     rect(width*0.495, 0, width*0.01, height);  
+}
+
+
+
+void draw() {
+  if(ui.getTimer().outOfTime()){
+    if(score >= scoreNeeded){
+      //SUCCESS. New wave.
+      wave++;
+      newWaveTarget();
+      ui.setNewWaveTimer(2,0); //reset timer.
+      newWave = true;
+    } else {
+      //GAME OVER.
+      wave = 1;
+      gameOver = true;
+    }
+  }
+  if(restartAnimationFlag){
+    if(restartAnimationHalfWayFlag){
+      drawUpdate();
+    }
+    ui.draw();
+    restartAnimation();
+    fill(255);
+    stroke(0);
+    rect(width*0.495, heightUIOffset, width*0.01, height);  
+    return;
+  }
+  if(!isPaused && !gameOver) {
+    physicsAndLogicUpdate(); //Update physics & positions once. Then display twice, once from player 1's perspective, second from player 2's.
+    drawUpdate();
   }
   player1.updateRespawnTimer(); //update timer is logic but is an exception. because we must compare the timer every frame, we cannot wait to compare it only after the player unpauses.
   player2.updateRespawnTimer();
   ui.draw();
-  updateMission();
   //end of draw to screen.
 }
 
@@ -296,4 +338,54 @@ private boolean lineOfSight(FriendlyAI ai, Player player){
     }
   }
   return false; //if here then line drawn was beyond visibility radius, failed.
+}
+
+static public float scoreMultiplier(float baseScore){ //multiplier increases by 1 every 2 waves.
+  return floor((wave+1)/2) * baseScore;
+}
+
+private void newWaveTarget(){ //multiplier increases by 1000 every wave.
+  ui.updateOldScoreTarget(scoreNeeded);
+  scoreNeeded += 1000;
+}
+
+public void resetFromGameOver(){ //MIGHT NEED TO BE EDITED - some temp code included.
+  gameOver = false;
+  score = 0;
+  scoreNeeded = FIRST_SCORE_NEEDED;
+  wave = 1;
+  ui.setNewWaveTimer(2, 0); 
+  map = new Map();
+  camera1 = new Camera(0, 0, 3.0f, heightUIOffset);
+  camera2 = new Camera(0, 0, 3.0f, heightUIOffset);
+  player1 = new Player(new PVector(0,0), 1);
+  player2 = new Player(new PVector(0,0), 2);
+  missionManager = new MissionManager();
+  int numPlanets = (int) random(3, 7);
+  map.generate(numPlanets);
+  
+  // temp first mission
+  ArrayList<Planet> randomPlanets = new ArrayList<Planet>();
+  randomPlanets.add(map.planets.get(1));
+  missionManager.addMission(new CargoMission(randomPlanets, map.planets.get(0)));
+  
+}
+
+private void restartAnimation(){
+  //(1-(abs(restartAnimationTimer.getMaxTime()/2 - restartAnimationTimer.getCurrTime()))/restartAnimationTimer.getMaxTime()/2))*restartAnimationTimer.getMaxTime()/2
+  noStroke();
+  fill(0);
+  circle(width*0.25, height*0.5, lerp(height*1.7,0, abs((restartAnimationTimer.getMaxTime()/2) - restartAnimationTimer.getCurrTime()) / (restartAnimationTimer.getMaxTime()/2)  ));
+  circle(width*0.75, height*0.5, lerp(height*1.7,0, abs((restartAnimationTimer.getMaxTime()/2) - restartAnimationTimer.getCurrTime()) / (restartAnimationTimer.getMaxTime()/2)  ));
+  if(restartAnimationTimer.getCurrTime() <= restartAnimationTimer.getMaxTime()/2 && !restartAnimationHalfWayFlag){
+    restartAnimationHalfWayFlag = true;
+    resetFromGameOver();
+  }
+  if(restartAnimationTimer.outOfTime()){
+    restartAnimationTimer = new Timer(RESTART_LENGTH, new PVector(0,0), 35);
+    restartAnimationFlag = false;
+    restartAnimationHalfWayFlag = false;
+    return;
+  }
+  restartAnimationTimer.updateTimer();
 }

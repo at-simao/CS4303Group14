@@ -176,6 +176,7 @@ class Player extends Body {
       drawUpTo = max(drawUpTo, 0);
     }
     for(int i = 0; i < floor(drawUpTo/3); i++){
+      CS4303SPACEHAUL.offScreenBuffer.noStroke();
       CS4303SPACEHAUL.offScreenBuffer.fill(255, 255, 255, floor(float(200*(trailing.length-i))/trailing.length));
       CS4303SPACEHAUL.offScreenBuffer.translate(trailing[i].x, trailing[i].y);
       CS4303SPACEHAUL.offScreenBuffer.rotate(-trailing[i].z+HALF_PI); //.z == orientation
@@ -212,6 +213,7 @@ class Player extends Body {
   }
   
   public void drawImpulseIndicator(){ //draws circle in direction of impulse/where player is accelerating.
+    CS4303SPACEHAUL.offScreenBuffer.noStroke();
     int upOrDown = 0;
     int leftOrRight = 0;
     if(!(thrustLeft || thrustRight || thrustUp || thrustDown)) {
