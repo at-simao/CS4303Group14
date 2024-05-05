@@ -38,6 +38,7 @@ class FriendlyAI extends Body { //Similar to Player except follows steering algo
         setAIInFront(otherAI);
         break;//end of loop
       }
+      //println("ESCAPE WHILE LOOP");
     } else {
       target = player;
       player.setAIFollowing(this);
@@ -147,8 +148,7 @@ class FriendlyAI extends Body { //Similar to Player except follows steering algo
       if(position.dist(target.getPosition()) > 500) {
         if(!isLost) {
           isLost = true;
-          aiInFront = null;
-          aiBehind = null;
+          loseRecursively(this);
           if(target.getAIBehindPlayer() == this){
             target.setAIFollowing(null);
           }
@@ -195,6 +195,17 @@ class FriendlyAI extends Body { //Similar to Player except follows steering algo
     this.position.y += velocity.y;
     this.position.x += velocity.x;
   }
+  
+  private void loseRecursively(FriendlyAI otherAI){
+    FriendlyAI temp;
+    while(otherAI != null){
+      otherAI.setAIInFront(null);
+      temp = otherAI.getAIBehind();
+      otherAI.setAIBehind(null);
+      otherAI = temp;
+    }
+  }
+  
   
   public void moveToSurface() {
     if(position.dist(targetPlanet.getPosition()) - targetPlanet.getDiameter() /2 < 5) {arrived = true;}
