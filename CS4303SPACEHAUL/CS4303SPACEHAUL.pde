@@ -23,6 +23,7 @@ Player player1;
 Player player2;
 
 ArrayList<FriendlyAI> aiList = new ArrayList<FriendlyAI>(); //arraylist storing all currently active escort-mission friendly ai.
+ArrayList<EnemyAI> enemyAIList = new ArrayList<EnemyAI>(); //arraylist storing all currently active patroling enemy ai.
 MissionManager missionManager;
 Camera camera1;
 Camera camera2;
@@ -162,6 +163,11 @@ void physicsAndLogicUpdate() {
   for(FriendlyAI friend : aiList){
     friend.integrate();
   }
+  for(EnemyAI enemy : enemyAIList){
+    enemy.checkPlayer1IsInRange(player1);
+    //enemy.checkPlayer2IsInRange(player2);
+    enemy.integrate();
+  }
   map.integrate();
   hazards.generate(player1, player2, 1);
   hazards.generate(player1, player2, 2);
@@ -221,6 +227,7 @@ void draw() {
       ui.setNewWaveTimer(2,0); //reset timer.
       newWave = true;
       hazards.updateChanceOfMeteors();
+      enemyAIList.add(new EnemyAI(new PVector(0,0)));
     } else {
       //GAME OVER.
       wave = 1;
@@ -245,6 +252,9 @@ void draw() {
   }
   player1.updateRespawnTimer(); //update timer is logic but is an exception. because we must compare the timer every frame, we cannot wait to compare it only after the player unpauses.
   player2.updateRespawnTimer();
+  for(EnemyAI ai : enemyAIList){
+    ai.updateProjectilesAndTimers(player1, player2, hazards.getMeteors());
+  }
   ui.draw();
   //end of draw to screen.
 }
@@ -307,6 +317,9 @@ PImage playerScreenDraw(Player player, Camera cameraForPlayer) {
   for(FriendlyAI friend : aiList){
     friend.draw();
   }
+  for(EnemyAI enemy : enemyAIList){
+    enemy.draw();
+  }
   
   hazards.draw();
   
@@ -317,14 +330,6 @@ PImage playerScreenDraw(Player player, Camera cameraForPlayer) {
   cameraForPlayer.end();
   offScreenBuffer.endDraw();
   return offScreenBuffer.get(); //returns this player's half of the screen as an image.
-}
-private void despawnDeadAI(){
-  for(int i = 0; i < aiList.size(); i++){
-    if(aiList.get(i).getHealth() <= 0){
-      aiList.remove(i);
-      i--;
-    }
-  }
 }
 
 private void friendlyAILogicUpdate(){
@@ -343,7 +348,7 @@ private void friendlyAILogicUpdate(){
   }
 }
 
-private boolean lineOfSight(FriendlyAI ai, Player player){
+static public boolean lineOfSight(FriendlyAI ai, Player player){
   PVector lineToPlayer = player.getPosition().copy().sub(ai.getPosition()).normalize();
   while(lineToPlayer.mag() < ai.getVisibilityRadius()){
     float oldMag = lineToPlayer.mag();
@@ -394,7 +399,8 @@ public void resetFromGameOver(){ //MIGHT NEED TO BE EDITED - some temp code incl
   missionManager.addMission(new CargoMission(randomPlanets, randomPlanets2));
   stars.clear();
   hazards.clear();
-  
+  enemyAIList.clear();
+  //enemyAIList.add(new EnemyAI(new PVector(10,10)));
 }
 
 private void restartAnimation(){

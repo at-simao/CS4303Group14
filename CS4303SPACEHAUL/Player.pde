@@ -270,4 +270,8 @@ class Player extends Body {
   public void decreaseAIs() {
     AIs--;
   }
+  
+  public Timer getRespawnTimer(){
+    return respawnTimer;
+  }
 }

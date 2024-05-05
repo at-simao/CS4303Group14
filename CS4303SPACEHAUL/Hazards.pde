@@ -88,6 +88,7 @@ class Hazards { //Maintains all hazards on map and handles collision logic for e
         escortAIMeteorCollisions(meteors.get(i), friend);
       }
       if(meteors.get(i).getToRemove()){
+        meteors.get(i).setDestroyed();
         meteors.remove(i);
       } else {
         meteors.get(i).integrate();
@@ -144,6 +145,7 @@ class Hazards { //Maintains all hazards on map and handles collision logic for e
       currentPosition = meteors.get(i).getPosition();
       if(currentPosition.copy().sub(player1.getPosition()).mag() > distanceOfSpawn*2 &&
           currentPosition.copy().sub(player2.getPosition()).mag() > distanceOfSpawn*2){
+        meteors.get(i).setDestroyed();
         meteors.remove(i);
         i--;  
       }
@@ -222,5 +224,9 @@ class Hazards { //Maintains all hazards on map and handles collision logic for e
   
   public void clear(){
     meteors.clear();
+  }
+  
+  public ArrayList<Meteor> getMeteors(){
+    return meteors;
   }
 }

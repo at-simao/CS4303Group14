@@ -88,7 +88,6 @@ class BackgroundStars { //Maintains background stars of level.
   }
   
   public void draw() {
-    println(stars.size());
     for (Star star : stars) {
       star.draw();
     }

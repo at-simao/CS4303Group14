@@ -232,14 +232,13 @@ class FriendlyAI extends Body { //Similar to Player except follows steering algo
   
   public void draw() {
     CS4303SPACEHAUL.offScreenBuffer.noStroke();
+    CS4303SPACEHAUL.offScreenBuffer.pushMatrix();
     drawHealthBar();
     CS4303SPACEHAUL.offScreenBuffer.translate(position.x, position.y);
     CS4303SPACEHAUL.offScreenBuffer.fill(colour);
     CS4303SPACEHAUL.offScreenBuffer.rotate(-orientation+HALF_PI);
     CS4303SPACEHAUL.offScreenBuffer.triangle(-radius, -radius, -radius, radius, radius*2, 0);
-    CS4303SPACEHAUL.offScreenBuffer.fill(colour);    
-    CS4303SPACEHAUL.offScreenBuffer.rotate((orientation-HALF_PI));
-    CS4303SPACEHAUL.offScreenBuffer.translate(-position.x, -position.y);
+    CS4303SPACEHAUL.offScreenBuffer.popMatrix();
   }
   
   public void drawHealthBar(){

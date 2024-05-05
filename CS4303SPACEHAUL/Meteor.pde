@@ -6,6 +6,7 @@ class Meteor extends Body{ //small bodies that attract one another and collide w
   private float ANGULAR_DRAG = 0.97;
   private boolean toRemove = false;
   private float minimumDistanceForGravity = 200;
+  private boolean isDestroyed = false;
   
   
   Meteor(float radius, float invM, PVector pos){
@@ -57,5 +58,13 @@ class Meteor extends Body{ //small bodies that attract one another and collide w
   
   public void changeAngularMomentum(float angularMomentum){
     this.angularMomentum += angularMomentum;
+  }
+  
+  public boolean isDestroyed(){
+    return isDestroyed;
+  }
+  
+  public void setDestroyed(){
+    isDestroyed = true;
   }
 }
