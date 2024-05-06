@@ -16,17 +16,11 @@ public final class Gravity extends ForceGenerator {
      * using Newton's Law of Gravitation: F = G ⋅ (m_1 ⋅ m_2) / r^2
      */
     public void updateForce(Body body) {
-<<<<<<< HEAD
-        // println("Updating Force");
-        //println("Player position: " + body.position);
-        //println("Planet position: " + planet.position);
         if(body instanceof Player){
           if(((Player)body).getRespawnTimer() != null){
             return;
           }
         }
-=======
->>>>>>> 08c50e4 (tidied up gravity forcegenerator code)
         PVector direction = PVector.sub(planet.position, body.position);
         float distance = floor(direction.mag());
         direction.normalize();
