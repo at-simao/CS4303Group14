@@ -1,9 +1,11 @@
 class Map {
     private final int STAR_COLOUR = #fdf498;
     private final int[] PLANET_COLOURS = {#5c68a3, #a35c68, #68a35c, #745ca3, #5c8ca3, #a3975c};
+    private final float DELIVERY_STN_ORBIT = 150;
 
     public Planet star;
     public ArrayList<Planet> planets;
+    public DeliveryStation deliveryStation;
 
     public Map() {
         planets = new ArrayList<>();
@@ -11,9 +13,10 @@ class Map {
 
     public void generate(int numPlanets) {
         planets.clear();
-        planets.add(new Planet(random(300, 600), 0, random(TWO_PI), 1, STAR_COLOUR));
+        planets.add(new Planet(random(300, 600), 0, random(TWO_PI), 1, STAR_COLOUR)); // Star
+        deliveryStation = new DeliveryStation(planets.get(0).getRadius() + DELIVERY_STN_ORBIT, random(TWO_PI), random(2000, 5000));
+        float previousOrbit = DELIVERY_STN_ORBIT;
 
-        float previousOrbit = 0;
         for (int i = 0; i < numPlanets; i++) {
             float radius = random(50, 200);
             float orbit = previousOrbit + random(800, 1500);
@@ -28,12 +31,13 @@ class Map {
         for (Planet planet : planets) {
             planet.integrate();
         }
+        deliveryStation.integrate();
     }
 
     public void draw() {
-        // star.draw();
         for (Planet planet : planets) {
             planet.draw();
         }
+        deliveryStation.draw();
     }
 }
