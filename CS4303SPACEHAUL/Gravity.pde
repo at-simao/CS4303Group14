@@ -17,8 +17,8 @@ public final class Gravity extends ForceGenerator {
      */
     public void updateForce(Body body) {
         // println("Updating Force");
-        println("Player position: " + body.position);
-        println("Planet position: " + planet.position);
+        //println("Player position: " + body.position);
+        //println("Planet position: " + planet.position);
         PVector direction = PVector.sub(planet.position, body.position);
         float distance = floor(direction.mag());
         direction.normalize();
@@ -40,7 +40,7 @@ public final class Gravity extends ForceGenerator {
         float forceMagnitude = G * (body.getMass() * planet.getMass()) / (distance * distance);
         // println("Ship Mass: " + body.getMass());
         // println("Planet Mass: " + planet.getMass());
-        println("Distance: " + distance);
+        //println("Distance: " + distance);
         // println("Resulting Force Magnitude: " + forceMagnitude);
 
         PVector resultingForce = direction.copy();

@@ -97,12 +97,12 @@ public static class CollisionUtil {
         float restitutionCoefficient = 0.2f;  // This makes the collision slightly bouncy
         PVector additionalForce = PVector.mult(collisionNormal, restitutionCoefficient * velocityAlongNormal);
 
-        println("Velocity along normal: " + velocityAlongNormal);
+        //println("Velocity along normal: " + velocityAlongNormal);
         PVector counterForce = PVector.add(stoppingForce, additionalForce);
         PVector resultingAcceleration = counterForce.copy();
         resultingAcceleration.mult(player.getInvMass());
         float counterVelocityAlongNormal = resultingAcceleration.dot(collisionNormal);
-        println("Velocity enacted by counter force: " + counterVelocityAlongNormal);
+        //println("Velocity enacted by counter force: " + counterVelocityAlongNormal);
 
         // Add both forces to the force accumulator
         player.addForce(PVector.add(stoppingForce, additionalForce));

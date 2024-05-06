@@ -427,7 +427,7 @@ public void resetFromGameOver(){ //MIGHT NEED TO BE EDITED - some temp code incl
   stars.generate(player1, player2, 1);
   hazards.clear();
   enemyAIList.clear();
-  //enemyAIList.add(new EnemyAI(new PVector(650,10)));
+  enemyAIList.add(new EnemyAI(new PVector(650,10)));
 }
 
 private void restartAnimation(){

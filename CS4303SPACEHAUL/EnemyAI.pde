@@ -24,7 +24,7 @@ class EnemyAI extends Body { //Similar to Player except follows steering algorit
   
   private ArrayList<Projectile> projectilesFired = new ArrayList<Projectile>();
   
-  private float visibilityRadius = radius*5;
+  private float visibilityRadius = radius*20;
   
   private Timer cooldownTimer = null;
   
@@ -282,13 +282,15 @@ class EnemyAI extends Body { //Similar to Player except follows steering algorit
       lineToPlayer.normalize().mult(oldMag + radius*0.01); //incrementally raise ray of sight until we hit our target.
       for(Planet planet : map.planets){
         if(lineToPlayer.dist(planet.getPosition()) < planet.getDiameter()/2){
+          println("FAILURE1");
           return false; //planet in the way of line of sight.
         }
-        if(lineToPlayer.dist(player.getPosition()) < player.getRadius()*2){
-          return true; //found player
-        }
+      }
+      if(lineToPlayer.dist(player.getPosition()) < player.getRadius()*2){
+        return true; //found player
       }
     }
+    println("FAILURE2");
     return false; //if here then line drawn was beyond visibility radius, failed.
   }
   
