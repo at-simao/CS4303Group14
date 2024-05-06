@@ -61,7 +61,7 @@ class Planet extends Body {
     CS4303SPACEHAUL.offScreenBuffer.fill(colour); // Set the color for the planet
     CS4303SPACEHAUL.offScreenBuffer.noStroke(); // No border for the planet
     //CS4303SPACEHAUL.offScreenBuffer.ellipse(0, 0, diameter, diameter); // Draw the planet as a circle
-    if(this != CS4303SPACEHAUL.map.star){
+    if(this != CS4303SPACEHAUL.map.planets.get(0)){
       CS4303SPACEHAUL.offScreenBuffer.arc(0,0,diameter,diameter,HALF_PI, HALF_PI*3);
       CS4303SPACEHAUL.offScreenBuffer.fill(lerpColor(color(0,0,0), colour, 0.5)); // Set the color for the planet
       CS4303SPACEHAUL.offScreenBuffer.rotate(PI); // Rotate the coordinate system by the current angle

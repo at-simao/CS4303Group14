@@ -138,8 +138,8 @@ class EnemyAI extends Body { //Similar to Player except follows steering algorit
         velocity.add(position.copy().sub(planet.getPosition()).normalize().mult(maxAcc/1.5)); 
       } 
     }
-    if(CS4303SPACEHAUL.map.star.getPosition().dist(position) < ((CS4303SPACEHAUL.map.star.getDiameter())+radius)*1.5){
-      velocity.add(position.copy().sub(CS4303SPACEHAUL.map.star.getPosition()).normalize().mult(maxAcc/1.5)); 
+    if(CS4303SPACEHAUL.map.planets.get(0).getPosition().dist(position) < ((CS4303SPACEHAUL.map.planets.get(0).getDiameter())+radius)*1.5){
+      velocity.add(position.copy().sub(CS4303SPACEHAUL.map.planets.get(0).getPosition()).normalize().mult(maxAcc/1.5)); 
     } 
   }
   
