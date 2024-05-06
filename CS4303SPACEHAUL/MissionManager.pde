@@ -14,7 +14,12 @@ class MissionManager {
       Mission mission = it.next();
       mission.update();
         if (mission.isCompleted()) {
-          score += mission.getScore();
+          if(!mission.getType()){
+            score += floor(mission.getScore()* (float(((EscortMission)mission).getNumThatMadeIt())/float(((EscortMission)mission).getMaxAI())));
+          } else{
+            score += mission.getScore();
+          }
+          
           it.remove(); // Remove the mission if it's completed
         }
       }

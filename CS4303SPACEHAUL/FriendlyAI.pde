@@ -156,6 +156,18 @@ class FriendlyAI extends Body { // Similar to Player except follows steering alg
   public void integrate() {
     if(health == 0){
       //DESPAWN WHEN HEALTH IS 0, RESET.
+      if(aiInFront == null){ //leading the trail
+        target.setAIFollowing(aiBehind);
+        if(aiBehind != null){
+          aiBehind.setAIInFront(null);
+        }
+      } else { //all other ai in the queue
+        if(aiBehind != null){
+          aiBehind.setAIInFront(aiInFront);
+        }
+        aiInFront.setAIBehind(aiBehind);
+      }
+      
     }
     if (aiInFront != null && (aiInFront.isSeeking())) {
       setTarget(target);
@@ -305,5 +317,9 @@ class FriendlyAI extends Body { // Similar to Player except follows steering alg
   
   public void setAIInFront(FriendlyAI ai){
     aiInFront = ai;
+  }
+  
+  public void kill(){
+    health = 0;
   }
 }

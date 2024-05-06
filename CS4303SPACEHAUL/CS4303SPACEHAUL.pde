@@ -119,6 +119,7 @@ void keyPressed() {
   if(key == 'E' || key == 'e') missionManager.attemptAction(player1);
   if(key == '1') missionManager.attemptAction(player2);
   if(keyCode == ENTER || keyCode == RETURN) currentSlide = min(++currentSlide, 3);
+  //if(key == 'K' || key == 'k') aiList.get(floor(random(0, aiList.size()))).kill();
 }
 
 void keyReleased() {
@@ -384,11 +385,11 @@ PImage playerScreenDraw(Player player, Camera cameraForPlayer) {
 
 private void friendlyAILogicUpdate(){
   for(int i = 0; i < aiList.size(); i++){
-    if(aiList.get(i).getHealth() <= 0){
-      aiList.remove(i);
-      i--; //despawn dead AI.
-      continue;
-    }
+    //if(aiList.get(i).getHealth() <= 0){
+    //  aiList.remove(i);
+    //  i--; //despawn dead AI.
+    //  continue;
+    //}
     if(!aiList.get(i).hasATarget()){
       boolean result = lineOfSight(aiList.get(i), player1);
       if(!result){ //if no line of sight to player 1, check for player 2
@@ -431,7 +432,7 @@ public void resetFromGameOver(){ //MIGHT NEED TO BE EDITED - some temp code incl
   scoreNeeded = FIRST_SCORE_NEEDED;
   ui.updateOldScoreTarget(0);
   wave = 1;
-  ui.setNewWaveTimer(2, 0); 
+  ui.setNewWaveTimer(10, 0); 
   map = new Map();
   camera1 = new Camera(650, 0, 3.0f, heightUIOffset, 1);
   camera2 = new Camera(0, 650, 3.0f, heightUIOffset, 2);

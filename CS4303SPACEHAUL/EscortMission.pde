@@ -4,10 +4,14 @@ class EscortMission extends Mission {
   private ArrayList<FriendlyAI> escortAIs = new ArrayList<>();
   private HashMap<FriendlyAI, Boolean> aiSpawned = new HashMap<>();
   private HashMap<FriendlyAI, Player> escortPlayers = new HashMap<>();
+  private int numOfAIThatMadeIt = 0;
+  private int numOfDeadAI = 0;
+  private int maxAI = 0;
   
   public EscortMission(ArrayList<Planet> origin, ArrayList<Planet> destination) {
     super(origin,destination, false);
     calculateScore(false);
+    maxAI = destination.size();
   }
     
   public boolean attemptAction(Player player) { //<>//
@@ -53,15 +57,24 @@ class EscortMission extends Mission {
       FriendlyAI ai = iterator.next();
       if (ai.arrived()) {
         //Update drop off planets
+        numOfAIThatMadeIt++;
         updateUi(getFadedColour(ai.getDestination().getColour()));
         completeMission(ai, iterator); // Pass the iterator to the completeMission method
+        continue;
+      }
+      if(ai.getHealth() <= 0){
+        iterator.remove(); // Remove AI from the list using the iterator
+        aiSpawned.remove(ai);
+        aiList.remove(ai);
+        escortPlayers.remove(ai);
+        numOfDeadAI++;
         continue;
       }
       if (aiSpawned.get(ai) && ai.getPosition().dist(ai.getDestination().getPosition()) < ai.getDestination().getDiameter()) {
         promptInteraction(escortPlayers.get(ai));
       }
     }
-    if (pickupPlanets.isEmpty() && escortAIs.isEmpty()) {
+    if (pickupPlanets.isEmpty() && (numOfDeadAI + numOfAIThatMadeIt) == maxAI) {
       isCompleted = true; // Ensure all conditions are met before marking as complete
      // missionManager.updatePickupZone(destinationPlanets);
     }
@@ -71,5 +84,13 @@ class EscortMission extends Mission {
     aiSpawned.remove(ai);
     aiList.remove(ai);
     escortPlayers.remove(ai);
+  }
+  
+  public int getNumThatMadeIt(){
+    return numOfAIThatMadeIt;
+  }
+  
+  public int getMaxAI(){
+    return maxAI;
   }
 }
