@@ -1,6 +1,6 @@
 class Hazards { //Maintains all hazards on map and handles collision logic for each, including collision between two meteors, meteor & player, and meteor & AI.
   
-  private float ELASTICITY = 0.5; //how much kinetic energy remains in colliding meteor, and how much is transferred to hit meteor (1-ELASTICITY).
+  private float ELASTICITY = 0.75; //how much kinetic energy remains in colliding meteor, and how much is transferred to hit meteor (1-ELASTICITY).
   
   private float FRICTION = 0.1;
   
@@ -18,47 +18,46 @@ class Hazards { //Maintains all hazards on map and handles collision logic for e
   }
 
   //Determines if it is is approprriate to spawn a new meteor.
-  public void generate(Player player1, Player player2, int whichPlayerIsCentre) { 
+  public Meteor generate(Player player1, Player player2, int whichPlayerIsCentre) {
     //random chance to generate meteor
-    if(meteors.size() < MAX_METEORS && random(0,1) > chanceOfNewMeteor){
+    if (meteors.size() < MAX_METEORS && random(0,1) > chanceOfNewMeteor) {
       //generated given player heading (should gen just ahead so as to not make procedural pop-in obvious).
       //Placing just ahead limits useless work, we need to sell illusion only when player is likely to see it.
       PVector playerPosition = null;
       PVector playerDirection = null;
       PVector potentialSpawnPosition = null;
-      if(whichPlayerIsCentre == 1){
-        if(player1.getVelocity().mag() == 0){
-          return; //game just started, or player is still, do not spawn yet.
+      if (whichPlayerIsCentre == 1) {
+        if (player1.getVelocity().mag() == 0) {
+          return null; //game just started, or player is still, do not spawn yet.
         }
         playerPosition = player1.getPosition();
         playerDirection = player1.getVelocity().copy().normalize();
         playerDirection.rotate(random(-PI/6, PI/6)); //random span of placement for dynamic feel.
         potentialSpawnPosition = playerDirection.copy().mult(distanceOfSpawn).add(playerPosition);
         if(potentialSpawnPosition.copy().sub(player2.getPosition()).mag() < distanceOfSpawn){ //do not spawn in front of other player (2), only off-screen.
-          return;
+          return null;
         }
       } else { // == 2
         if(player2.getVelocity().mag() == 0){
-          return; //game just started, or player is still, do not spawn yet.
+          return null; //game just started, or player is still, do not spawn yet.
         }
         playerPosition = player2.getPosition();
         playerDirection = player2.getVelocity().copy().normalize();
         playerDirection.rotate(random(-PI/6, PI/6)); //random span of placement
         potentialSpawnPosition = playerDirection.copy().mult(distanceOfSpawn).add(playerPosition);
         if(potentialSpawnPosition.copy().sub(player1.getPosition()).mag() < distanceOfSpawn){ //do not spawn in front of other player (1), only off-screen.
-          return;
+          return null;
         }
       }
       
-      Meteor newMeteor = new Meteor(10, 0.05, potentialSpawnPosition);
-      
+      Meteor newMeteor = new Meteor(10, 0.1, potentialSpawnPosition);
       
       //check not spawning on top of planet
       ArrayList<Planet> planets = CS4303SPACEHAUL.map.planets;
       PVector distanceFromMeteor = potentialSpawnPosition.copy();
       for(Planet planet : planets){
         if(distanceFromMeteor.copy().sub(planet.getPosition()).mag() < 200*2*1.5 + newMeteor.getWidth()*2){ //max radius of planet is 200, 
-          return; //do not spawn meteor on top of a planet
+          return null; //do not spawn meteor on top of a planet
         }
       }
       
@@ -66,32 +65,35 @@ class Hazards { //Maintains all hazards on map and handles collision logic for e
       
       for(Meteor meteor : meteors){
         if(distanceFromMeteor.copy().sub(meteor.getPosition()).mag() < newMeteor.getWidth()+meteor.getWidth()){
-          return; //do not spawn on top of another meteor
+          return null; //do not spawn on top of another meteor
         }
       }
       
       //passed all checks, add to array list
-      
       meteors.add(newMeteor);
-      
+      println("Total Meteors: " + meteors.size());
+      return newMeteor;
     }
+
+    return null;
   }
 
   //Performs all logic for hazards, including collision detection.
   public void integrate(Player player1, Player player2, ArrayList<FriendlyAI> escortAI) {
-    for (int i = 0; i < meteors.size(); i++) {
-      //gravity from other meteors
-      meteors.get(i).integratePerMeteor(meteors);
-      meteorCollisions(meteors.get(i));
-      playerMeteorCollisions(meteors.get(i), player1, player2);
+    Iterator<Meteor> iterator = meteors.iterator();
+    while (iterator.hasNext()) {
+      Meteor meteor = iterator.next();
+      meteor.updateVelocity();
+      meteorCollisions(meteor);
+      playerMeteorCollisions(meteor, player1, player2);
       for(FriendlyAI friend : escortAI){
-        escortAIMeteorCollisions(meteors.get(i), friend);
+        escortAIMeteorCollisions(meteor, friend);
       }
-      if(meteors.get(i).getToRemove()){
-        meteors.get(i).setDestroyed();
-        meteors.remove(i);
+      if(meteor.getToRemove()){
+        meteor.setDestroyed();
+        iterator.remove();
       } else {
-        meteors.get(i).integrate();
+        meteor.integrate();
       }
     }
   }
@@ -139,17 +141,23 @@ class Hazards { //Maintains all hazards on map and handles collision logic for e
   }
   
   //Despawns meteors if both players are sufficiently far away.
-  public void deleteHazard(Player player1, Player player2){
+  public ArrayList<Meteor> deleteHazard(Player player1, Player player2) {
+    ArrayList<Meteor> deletedHazards = new ArrayList<>();
+
     PVector currentPosition = null;
-    for (int i = 0; i < meteors.size(); i++) {
-      currentPosition = meteors.get(i).getPosition();
-      if(currentPosition.copy().sub(player1.getPosition()).mag() > distanceOfSpawn*2 &&
-          currentPosition.copy().sub(player2.getPosition()).mag() > distanceOfSpawn*2){
-        meteors.get(i).setDestroyed();
-        meteors.remove(i);
-        i--;  
+    Iterator<Meteor> iterator = meteors.iterator();
+    while (iterator.hasNext()) {
+      Meteor meteor = iterator.next();
+      currentPosition = meteor.getPosition();
+      if (currentPosition.copy().sub(player1.getPosition()).mag() > distanceOfSpawn*2 &&
+            currentPosition.copy().sub(player2.getPosition()).mag() > distanceOfSpawn*2) {
+        meteor.setDestroyed();
+        deletedHazards.add(meteor);
+        iterator.remove();
       }
     }
+
+    return deletedHazards;
   }
   
   public void draw() {

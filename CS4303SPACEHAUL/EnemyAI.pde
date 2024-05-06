@@ -282,7 +282,7 @@ class EnemyAI extends Body { //Similar to Player except follows steering algorit
       lineToPlayer.normalize().mult(oldMag + radius*0.01); //incrementally raise ray of sight until we hit our target.
       for(Planet planet : map.planets){
         if(lineToPlayer.dist(planet.getPosition()) < planet.getDiameter()/2){
-          println("FAILURE1");
+          // println("FAILURE1");
           return false; //planet in the way of line of sight.
         }
       }
@@ -290,7 +290,7 @@ class EnemyAI extends Body { //Similar to Player except follows steering algorit
         return true; //found player
       }
     }
-    println("FAILURE2");
+    // println("FAILURE2");
     return false; //if here then line drawn was beyond visibility radius, failed.
   }
   

@@ -196,6 +196,7 @@ void physicsAndLogicUpdate() {
   }
   player1.integrate();
   player2.integrate();
+
   for(FriendlyAI friend : aiList){
     friend.integrate();
   }
@@ -204,10 +205,31 @@ void physicsAndLogicUpdate() {
     //enemy.checkPlayer2IsInRange(player2);
     enemy.integrate();
   }
-  hazards.generate(player1, player2, 1);
-  hazards.generate(player1, player2, 2);
-  hazards.deleteHazard(player1, player2);
+
+  ArrayList<Meteor> newMeteors = new ArrayList<>();
+  Meteor meteor1 = hazards.generate(player1, player2, 1);
+  Meteor meteor2 = hazards.generate(player1, player2, 2);
+  if (meteor1 != null) newMeteors.add(meteor1);
+  if (meteor2 != null) newMeteors.add(meteor2);
+  for (Meteor newMeteor : newMeteors) { // Updates the force registry only if new hazards are generated.
+    println("Meteor generated");
+    ArrayList<Meteor> meteors = hazards.getMeteors();
+    for (Meteor meteor : meteors) {
+      if (!meteor.equals(newMeteor)) {
+        forceRegistry.add(newMeteor, new Gravity(meteor));
+        forceRegistry.add(meteor, new Gravity(newMeteor));
+      }
+    }
+  }
+
+  ArrayList<Meteor> deletedHazards = hazards.deleteHazard(player1, player2);
+  if (deletedHazards.size() != 0) println("Deleting Hazards...");
+  for (Meteor meteor : deletedHazards) {
+    println("Removing meteor from force registry");
+    forceRegistry.remove(meteor);
+  }
   hazards.integrate(player1, player2, aiList);
+
   stars.generate(player1, player2, 1);
   stars.generate(player1, player2, 2);
   stars.deleteStar(player1, player2);

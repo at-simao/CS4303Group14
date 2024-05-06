@@ -42,4 +42,20 @@ class Body { //from: https://studres.cs.st-andrews.ac.uk/CS4303/Lectures/L5/Grav
   public float getInvMass(){
     return invMass;
   }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj) return true;
+    if (obj == null || getClass() != obj.getClass()) return false;
+    Body body = (Body) obj;
+    return Float.compare(body.invMass, invMass) == 0 &&
+          position.equals(body.position);
+  }
+
+  @Override
+  public int hashCode() {
+    int result = position != null ? position.hashCode() : 0;
+    result = 31 * result + (invMass != 0 ? Float.floatToIntBits(invMass) : 0);
+    return result;
+  }
 }

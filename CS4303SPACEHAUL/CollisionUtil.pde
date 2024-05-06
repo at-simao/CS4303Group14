@@ -60,20 +60,17 @@ public static class CollisionUtil {
         // Check for each type of collision
         for (PVector vertex : vertices) {
             if (pointInsideCircle(vertex, planet.position, radius)) {
-                println("Vertex is inside planet");
                 return true;
             }
         }
 
         if (circleInsideTriangle(planet.position, vertices)) {
-            println("Planet is inside player");
             return true;
         }
 
         for (int i = 0; i < vertices.length; i++) {
             int next = (i + 1) % vertices.length;
             if (edgeIntersectsCircle(vertices[i], vertices[next], planet.position, radius)) {
-                println("Edge intersects with planet.");
                 return true;
             }
         }
