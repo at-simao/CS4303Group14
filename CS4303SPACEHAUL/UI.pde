@@ -62,13 +62,13 @@ class UI{
     if(CS4303SPACEHAUL.isPaused){
       stroke(0);
       textSize(60);
-      text("PAUSED!", 0.25*width, height*0.45); //paused text display
+      text("PAUSED!", 0.25*width, height*0.2); //paused text display
       textSize(50);
-      text("Press [SPACE] to continue!", 0.25*width, height*0.5); //paused text display
+      text("Press [SPACE] to continue!", 0.25*width, height*0.25); //paused text display
       textSize(60);
-      text("PAUSED!", 0.75*width, height*0.45); //paused text display
+      text("PAUSED!", 0.75*width, height*0.2); //paused text display
       textSize(50);
-      text("Press [SPACE] to continue!", 0.75*width, height*0.5); //paused text display
+      text("Press [SPACE] to continue!", 0.75*width, height*0.25); //paused text display
     }
     if(CS4303SPACEHAUL.newWave){
       if(newWaveMessageTimer.outOfTime()){

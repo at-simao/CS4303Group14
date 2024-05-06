@@ -11,16 +11,20 @@ class Camera {
   final int CAMERA_FRAME_LAG = 15;
   PVector[] frameLagForCamera = new PVector[CAMERA_FRAME_LAG];
   int cameraLagIndex = 1;
+  
+  
+  int playerFollowing = 1;
 
   
   
-  public Camera(int x, int y, float zoom, float heightUIOffset) {
+  public Camera(int x, int y, float zoom, float heightUIOffset, int playerFollowing) {
     this.firstTranslate = new PVector(x, y);
     this.zoom = zoom;
     for(int i = 0; i < CAMERA_FRAME_LAG; i++){
       frameLagForCamera[i] = new PVector(x,y);
     }
     this.heightUIOffset = heightUIOffset;
+    this.playerFollowing = playerFollowing; //1 or 2
   }
 
   public void begin(PVector position) {
@@ -76,6 +80,10 @@ class Camera {
   //  return transformedResult;
   //  //* getZoom()) + getSecondTranslation());
   //}
+  
+  public int getWhichPlayerFollowing(){
+    return playerFollowing;
+  }
   
   
 }

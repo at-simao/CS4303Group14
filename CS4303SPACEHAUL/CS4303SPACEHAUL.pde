@@ -1,7 +1,7 @@
 //DEBUG VARIABLES
 boolean player1ZoomOut = false;
 boolean player2ZoomOut = false;
-final float ZOOM_OUT_VALUE = 0.3;
+final float ZOOM_OUT_VALUE = 0.1;
 // WAVE & SCORE & GAME OVER
 static int wave = 1;
 static int score = 0;
@@ -14,6 +14,7 @@ private final int RESTART_LENGTH = 1500;
 private Timer restartAnimationTimer = new Timer(RESTART_LENGTH, new PVector(0,0), 35);
 // UI
 static boolean isPaused = false;
+static boolean pausePressedDrawOnce = false;
 static boolean newWave = false;
 float heightUIOffset;
 UI ui;
@@ -52,8 +53,8 @@ void setup() {
   ui.setNewWaveTimer(2, 0); //DEMO TIMER, this is meant to be changed when we actually implement a wave system.
   
   // set up two cameras, one for each player.
-  camera1 = new Camera(0, 0, 3.0f, heightUIOffset);
-  camera2 = new Camera(0, 0, 3.0f, heightUIOffset);
+  camera1 = new Camera(0, 0, 3.0f, heightUIOffset, 1);
+  camera2 = new Camera(0, 0, 3.0f, heightUIOffset, 2);
   player1 = new Player(new PVector(650,0), 1);
   player2 = new Player(new PVector(0,650), 2);
   //TO BE REMOVED
@@ -88,6 +89,15 @@ void keyPressed() {
   }
   if(key == ' ' && !restartAnimationFlag){
     isPaused = !isPaused;
+    if(isPaused && !pausePressedDrawOnce){
+      pausePressedDrawOnce = true; //we want to draw 1 frame for our massive zoom-out pause screen.
+      player1ZoomOut = true;
+      player2ZoomOut = true;
+    }
+    if(!isPaused){
+      player1ZoomOut = false;
+      player2ZoomOut = false;
+    }
     return;
   } 
   if(key == 'w' || key == 'W') player1.thrustUp = true;
@@ -205,13 +215,13 @@ void applyGravityToPlayer(Player player){
 
 void drawUpdate(){
     if(player1ZoomOut){
-      camera1.setZoom(ZOOM_OUT_VALUE); //debug feature: zoom out to better see solar system. Press Z to activate, and X to deactivate.
+      camera1.setZoom(!isPaused ? ZOOM_OUT_VALUE : ZOOM_OUT_VALUE*0.8); //debug feature: zoom out to better see solar system. Press Z to activate, and X to deactivate.
     } else {
       camera1.setZoom(3 / min((1+0.03*player1.getVelocity().mag()), MAX_ZOOM_OUT)); //zoom out effect to give feeling to player of FTL travel.
     }
     player1Screen = playerScreenDraw(player1, camera1); //write player 1's screen to buffer, outputs to an image.
     if(player2ZoomOut){
-      camera2.setZoom(ZOOM_OUT_VALUE); //debug feature: zoom out to better see solar system. Press C to activate, and V to deactivate.
+      camera2.setZoom(!isPaused ? ZOOM_OUT_VALUE : ZOOM_OUT_VALUE*0.8); //debug feature: zoom out to better see solar system. Press C to activate, and V to deactivate.
     } else {
       camera2.setZoom(3 / min((1+0.03*player2.getVelocity().mag()), MAX_ZOOM_OUT)); //zoom out effect to give feeling to player of FTL travel.
     }
@@ -269,6 +279,10 @@ void draw() {
     physicsAndLogicUpdate(); //Update physics & positions once. Then display twice, once from player 1's perspective, second from player 2's.
     drawUpdate();
     updateMission();
+  }
+  if(pausePressedDrawOnce){
+    drawUpdate();
+    pausePressedDrawOnce = false;
   }
   player1.updateRespawnTimer(); //update timer is logic but is an exception. because we must compare the timer every frame, we cannot wait to compare it only after the player unpauses.
   player2.updateRespawnTimer();
@@ -328,24 +342,29 @@ PImage playerScreenDraw(Player player, Camera cameraForPlayer) {
   offScreenBuffer.textMode(CENTER);
 
   cameraForPlayer.begin(player.getPosition());
-
-  stars.draw();
+  
+  if((cameraForPlayer.getWhichPlayerFollowing() == 1 && !player1ZoomOut) || (cameraForPlayer.getWhichPlayerFollowing() == 2 && !player2ZoomOut)){
+    stars.draw();
+  }
   map.draw();
   
   player1.draw();
   player2.draw();
-  for(FriendlyAI friend : aiList){
-    friend.draw();
-  }
-  for(EnemyAI enemy : enemyAIList){
-    enemy.draw();
+  if((cameraForPlayer.getWhichPlayerFollowing() == 1 && !player1ZoomOut) || (cameraForPlayer.getWhichPlayerFollowing() == 2 && !player2ZoomOut)){
+    for(FriendlyAI friend : aiList){
+      friend.draw();
+    }
+    for(EnemyAI enemy : enemyAIList){
+      enemy.draw();
+    }
+    
+    hazards.draw();
+    
+    player.drawImpulseIndicator();
+    drawArrows(player.getPosition());
+    player.drawHealthBar();
   }
   
-  hazards.draw();
-  
-  player.drawImpulseIndicator();
-  drawArrows(player.getPosition());
-  player.drawHealthBar();
   
   cameraForPlayer.end();
   offScreenBuffer.endDraw();
@@ -403,8 +422,8 @@ public void resetFromGameOver(){ //MIGHT NEED TO BE EDITED - some temp code incl
   wave = 1;
   ui.setNewWaveTimer(2, 0); 
   map = new Map();
-  camera1 = new Camera(0, 0, 3.0f, heightUIOffset);
-  camera2 = new Camera(0, 0, 3.0f, heightUIOffset);
+  camera1 = new Camera(0, 0, 3.0f, heightUIOffset, 1);
+  camera2 = new Camera(0, 0, 3.0f, heightUIOffset, 2);
   player1 = new Player(new PVector(650,0), 1);
   player2 = new Player(new PVector(0,650), 2);
   missionManager = new MissionManager();
