@@ -27,7 +27,7 @@ class EscortMission extends Mission {
       Planet destination = destinationIterator.next();
      // if (!aiSpawned.containsKey(origin) && player.getPosition().dist(origin.getPosition()) < origin.getDiameter()) {
       if (player.getPosition().dist(origin.getPosition()) < origin.getDiameter()) {
-        if(player.getAIs() > 1) {break;}
+        if(player.getAIs() > 5) {break;}
         FriendlyAI newAI = new FriendlyAI(origin.getPosition(), destination);
         aiList.add(newAI);
         newAI.setTarget(player);  // move to constructor

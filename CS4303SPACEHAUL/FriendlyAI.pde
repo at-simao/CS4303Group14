@@ -79,7 +79,7 @@ class FriendlyAI extends Body { // Similar to Player except follows steering alg
   //To avoid crashing into planets, AI flies around the planet to get to target.
   public void avoidPlanets(){
     for(Planet planet : CS4303SPACEHAUL.map.planets){
-      if(planet.getPosition().dist(position) < ((planet.getDiameter())+radius)*1.5){
+      if(planet.getPosition().dist(position) < ((planet.getDiameter()/2)+radius)*1.5){
         velocity.add(position.copy().sub(planet.getPosition()).normalize().mult(maxAcc/1.5)); 
       } 
     }
@@ -134,6 +134,18 @@ class FriendlyAI extends Body { // Similar to Player except follows steering alg
     return arrived;
   }
   public void seekPlanet() {
+    if(aiInFront == null){ //leading the trail
+      target.setAIFollowing(aiBehind);
+      if(aiBehind != null){
+        aiBehind.setAIInFront(null);
+      }
+    } else { //all other ai in the queue
+      if(aiBehind != null){
+        aiBehind.setAIInFront(aiInFront);
+      }
+      aiInFront.setAIBehind(aiBehind);
+    }
+    //ai.loseRecursively(ai);
     this.seekPlanet = true;
   }
   
@@ -146,9 +158,7 @@ class FriendlyAI extends Body { // Similar to Player except follows steering alg
       //DESPAWN WHEN HEALTH IS 0, RESET.
     }
     if (aiInFront != null && (aiInFront.isSeeking())) {
-      setTarget(target);  //  //<>//
-      aiInFront = null;  // //<>//
-      target.setAIFollowing(this); //<>//
+      setTarget(target);
     }
     if(seekPlanet) {
       moveToSurface();
@@ -225,7 +235,9 @@ class FriendlyAI extends Body { // Similar to Player except follows steering alg
   
   
   public void moveToSurface() {
-    if(position.dist(destination.getPosition()) - destination.getDiameter() /2 < 5) {arrived = true;}
+    if(position.dist(destination.getPosition()) - destination.getDiameter() /2 < 5) {
+      arrived = true;
+    }
     PVector toPlanetCenter = PVector.sub(destination.getPosition(), position);
     toPlanetCenter.setMag(destination.getDiameter() / 2 + 5); // Move to just outside the planet's surface
     PVector targetPosition = PVector.add(destination.getPosition(), toPlanetCenter);
@@ -273,6 +285,10 @@ class FriendlyAI extends Body { // Similar to Player except follows steering alg
   
   public boolean hasATarget(){
     return (target != null);
+  }
+  
+  public Player getTarget(){
+    return target;
   }
   
   public FriendlyAI getAIBehind(){
