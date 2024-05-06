@@ -226,7 +226,7 @@ class Player extends Body {
   
   public void drawHealthBar(){
     CS4303SPACEHAUL.offScreenBuffer.translate(position.x, position.y);
-    CS4303SPACEHAUL.offScreenBuffer.fill(0);
+    CS4303SPACEHAUL.offScreenBuffer.fill(220,0,0);
     CS4303SPACEHAUL.offScreenBuffer.noStroke();
     CS4303SPACEHAUL.offScreenBuffer.rect(-radius*1.5, radius*2.5, radius*3, radius/2);
     CS4303SPACEHAUL.offScreenBuffer.fill(0,180,0);

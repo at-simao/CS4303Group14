@@ -1,6 +1,6 @@
 class Map {
     private final int STAR_COLOUR = #fdf498;
-    private final int[] PLANET_COLOURS = {#5c68a3, #a35c68, #68a35c, #745ca3, #5c8ca3, #a3975c};
+    private final int[] PLANET_COLOURS = {#5c68a3, #a35c68, #e41e5f, #36e085, #f67303, #2127c8};
     private final float DELIVERY_STN_ORBIT = 150;
 
     public Planet star;

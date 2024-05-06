@@ -212,10 +212,10 @@ class Hazards { //Maintains all hazards on map and handles collision logic for e
         clockWiseOrNot = 1;
       }
     }
-    if(m2.getVelocity().mag() > 0.1){
+    if(m2.getVelocity().mag() > 0.2){
       m1.changeAngularMomentum(FRICTION*oldSpeedM2*clockWiseOrNot);
     }
-    if(m1.getVelocity().mag() > 0.1){
+    if(m1.getVelocity().mag() > 0.2){
       m2.changeAngularMomentum(FRICTION*oldSpeedM1*-clockWiseOrNot);
     }
   }
