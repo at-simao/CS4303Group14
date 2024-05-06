@@ -198,7 +198,6 @@ void physicsAndLogicUpdate() {
     //enemy.checkPlayer2IsInRange(player2);
     enemy.integrate();
   }
-  map.integrate();
   hazards.generate(player1, player2, 1);
   hazards.generate(player1, player2, 2);
   hazards.deleteHazard(player1, player2);

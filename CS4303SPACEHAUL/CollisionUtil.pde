@@ -81,30 +81,28 @@ public static class CollisionUtil {
         return false; // No collision detected
     }
 
+    /**
+     * Handles the collision between a player and a planet by applying a force to stop the player
+     * and an additional force to push the player away slightly, preventing penetration into the planet.
+     * This method calculates the normal vector from the planet to the player, determines the relative
+     * velocity along this vector, and applies forces based on this information to manage the collision.
+     *
+     * @param player The player object involved in the collision. This object must have a position,
+     *               velocity, and mass properties.
+     * @param planet The planet object involved in the collision. This object must have a position
+     *               and velocity properties.
+     */
     public static void handleCollision(Player player, Body planet) {
-        // Calculate the normal vector from the planet to the player
         PVector collisionNormal = PVector.sub(player.position, planet.position);
         collisionNormal.normalize();
-
         PVector relativeVelocity = PVector.sub(player.velocity, planet.velocity);
         float velocityAlongNormal = relativeVelocity.dot(collisionNormal);
 
-        // Calculate the force needed to stop the player
         PVector stoppingForce = PVector.mult(collisionNormal, -velocityAlongNormal * player.getMass());
-
-        // Apply an additional force to push the player away, ensuring they don't penetrate the barrier
-        // This can be adjusted based on how hard you want the barrier to feel
-        float restitutionCoefficient = 0.2f;  // This makes the collision slightly bouncy
+        float restitutionCoefficient = 0.2f; // Apply an additional force to push the player away
         PVector additionalForce = PVector.mult(collisionNormal, restitutionCoefficient * velocityAlongNormal);
 
-        //println("Velocity along normal: " + velocityAlongNormal);
-        PVector counterForce = PVector.add(stoppingForce, additionalForce);
-        PVector resultingAcceleration = counterForce.copy();
-        resultingAcceleration.mult(player.getInvMass());
-        float counterVelocityAlongNormal = resultingAcceleration.dot(collisionNormal);
-        //println("Velocity enacted by counter force: " + counterVelocityAlongNormal);
-
-        // Add both forces to the force accumulator
-        player.addForce(PVector.add(stoppingForce, additionalForce));
+        PVector collisionForce = PVector.add(stoppingForce, additionalForce);
+        player.addForce(collisionForce);
     }
 }
