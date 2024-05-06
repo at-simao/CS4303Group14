@@ -31,6 +31,8 @@ class Player extends Body {
   
   private FriendlyAI aiBehindPlayer = null;
   
+  private int escortMissionId = -1;
+  
   public Player(PVector start, int whichPlayer) {
     super(start, new PVector(0,0), 0.1);
     if(whichPlayer == 1){
@@ -295,4 +297,12 @@ class Player extends Body {
   public Timer getRespawnTimer(){
     return respawnTimer;
   }
+  
+  //public void setEscortMissionId(int id){
+  //  escortMissionId = id;
+  //}
+  
+  //public int getEscortMissionId(){
+  //  return escortMissionId ;
+  //}
 }
