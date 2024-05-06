@@ -14,6 +14,8 @@ private final int RESTART_LENGTH = 1500;
 private Timer restartAnimationTimer = new Timer(RESTART_LENGTH, new PVector(0,0), 35);
 private boolean justStarted = true;
 private boolean justStartedTransition = true;
+private int currentSlide = 0;
+private final int MAX_SLIDES = 3;
 // UI
 static boolean isPaused = false;
 static boolean pausePressedDrawOnce = false;
@@ -116,7 +118,7 @@ void keyPressed() {
   if(key == 'V' || key == 'v') player2ZoomOut = false;
   if(key == 'E' || key == 'e') missionManager.attemptAction(player1);
   if(key == '1') missionManager.attemptAction(player2);
-  if(keyCode == ENTER || keyCode == RETURN) justStarted = false;
+  if(keyCode == ENTER || keyCode == RETURN) currentSlide = min(++currentSlide, 3);
 }
 
 void keyReleased() {
@@ -252,7 +254,11 @@ void drawUpdate(){
 
 void draw() {
   if(justStarted){
-    PImage splashScreen = loadImage("./data/CONTROLS.png");
+    if(currentSlide == MAX_SLIDES){
+      justStarted = false;
+      return;
+    }
+    PImage splashScreen = loadImage("./data/CONTROLS"+currentSlide+".PNG");
     splashScreen.resize(width,height);
     image(splashScreen, 0, 0);
     return;
