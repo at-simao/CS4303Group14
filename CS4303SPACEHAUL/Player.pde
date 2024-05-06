@@ -43,7 +43,10 @@ class Player extends Body {
   }
 
   public void updateVelocity() {
-    PVector resultingAcceleration = forceAccumulator.get();
+    if(respawnTimer != null){
+      return; //do not apply forces whilst player is respawning
+    }
+    PVector resultingAcceleration = forceAccumulator.copy();
     resultingAcceleration.mult(invMass);
     velocity.add(resultingAcceleration);
 
@@ -133,10 +136,6 @@ class Player extends Body {
   
   public boolean hasCargo() {
     return this.hasCargo;
-  }
-  
-  private void updateOrientation(){
-    //defunct currently, may be used later if we reverse change in player movement.
   }
   
   private void updateThrust(){

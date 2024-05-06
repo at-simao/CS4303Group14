@@ -424,9 +424,10 @@ public void resetFromGameOver(){ //MIGHT NEED TO BE EDITED - some temp code incl
   randomPlanets2.add(map.planets.get(0));
   missionManager.addMission(new CargoMission(randomPlanets, randomPlanets2));
   stars.clear();
+  stars.generate(player1, player2, 1);
   hazards.clear();
   enemyAIList.clear();
-  //enemyAIList.add(new EnemyAI(new PVector(10,10)));
+  enemyAIList.add(new EnemyAI(new PVector(650,10)));
 }
 
 private void restartAnimation(){

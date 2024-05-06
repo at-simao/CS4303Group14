@@ -1,7 +1,7 @@
 class BackgroundStars { //Maintains background stars of level.
   
-  private int MAX_ATTEMPT_AT_PLACING = 100;
-  private int MAX_STARS = 100;
+  private int MAX_ATTEMPT_AT_PLACING = 400;
+  private int MAX_STARS = 200;
   
   private float radiusOfSpawn = 300;
   
@@ -16,23 +16,28 @@ class BackgroundStars { //Maintains background stars of level.
     if(stars.size() > MAX_STARS){
       return; // do not place
     }
-    //random chance to generate meteor
     if(stars.size() == 0){
       //game just started
       Star newStar;
       for(int i = 0; i < MAX_ATTEMPT_AT_PLACING; i++){
-        newStar = new Star(new PVector(player1.getPosition().x + random(-radiusOfSpawn, radiusOfSpawn), player1.getPosition().y + random(-radiusOfSpawn, radiusOfSpawn)), 2);
+        if(i % 2 != 0){ //aternate between placing stars visible to player 1 and player 2
+          newStar = new Star(new PVector(player1.getPosition().x + random(-radiusOfSpawn, radiusOfSpawn), player1.getPosition().y + random(-radiusOfSpawn, radiusOfSpawn)), 1.5);
+        } else {
+          newStar = new Star(new PVector(player2.getPosition().x + random(-radiusOfSpawn, radiusOfSpawn), player2.getPosition().y + random(-radiusOfSpawn, radiusOfSpawn)), 1.5);
+        }
         int currSize = stars.size();
         if(currSize == 0){
           stars.add(newStar);
+          continue;
         }
-        for(int j = 0; j < currSize; j++){
+        for(int j = 0; j < currSize && stars.size() < MAX_STARS; j++){
           //check not on top of other stars
-          if(newStar.getPosition().dist(stars.get(j).getPosition()) <= newStar.getRadius() + stars.get(j).getRadius()){
+          if(newStar.getPosition().dist(stars.get(j).getPosition()) > newStar.getRadius()*4){
             stars.add(newStar);
           }
         }
       }
+      println("ESCAPE");
       return;
     }
     PVector potentialSpawnPosition = null;
@@ -70,7 +75,7 @@ class BackgroundStars { //Maintains background stars of level.
     
     //passed all tests, add
     
-    stars.add(new Star(potentialSpawnPosition, 2));
+    stars.add(new Star(potentialSpawnPosition, 1.5));
     
   }
 
