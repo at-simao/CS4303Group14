@@ -25,6 +25,7 @@ class Player extends Body {
   
   private PVector[] trailing = new PVector[10];
   private Timer respawnTimer = null;
+  private boolean justRespawned = false;
   private boolean hasCargo = false;
   private Planet cargo;
   
@@ -47,13 +48,21 @@ class Player extends Body {
       return; //do not apply forces whilst player is respawning
     }
     PVector resultingAcceleration = forceAccumulator.copy();
-    resultingAcceleration.mult(invMass);
-    velocity.add(resultingAcceleration);
-
-    updateThrust();
-
-    forceAccumulator.x = 0;
-    forceAccumulator.y = 0;
+    if(justRespawned){ //prevents accumulating force when just respawning
+      updateThrust();
+      forceAccumulator.x = 0;
+      forceAccumulator.y = 0;
+      justRespawned = false;
+    } else {
+      resultingAcceleration.mult(invMass);
+      velocity.add(resultingAcceleration);
+  
+      updateThrust();
+  
+      forceAccumulator.x = 0;
+      forceAccumulator.y = 0;
+    }
+    
   }
   
   public void updateRespawnTimer(){
@@ -72,6 +81,11 @@ class Player extends Body {
   
   public void integrate() {
     if(respawnTimer != null){
+      for(Planet planet : CS4303SPACEHAUL.map.planets){
+        if(planet.getPosition().dist(position) < planet.getDiameter()/2 + radius*2){
+          position.add(planet.getPosition().copy().sub(position).normalize().mult(-radius*2));
+        }
+      }
       return; //no movement allowed until timer is spent.
     }
     //shift trailing by 1 to the right
@@ -165,6 +179,7 @@ class Player extends Body {
       drawUpTo = 0;
       if(respawnTimer.outOfTime()){
         respawnTimer = null;
+        justRespawned = true;
         health = MAX_HEALTH;
         return;
       }

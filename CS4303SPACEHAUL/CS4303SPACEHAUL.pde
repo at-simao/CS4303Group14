@@ -417,7 +417,7 @@ public void resetFromGameOver(){ //MIGHT NEED TO BE EDITED - some temp code incl
   scoreNeeded = FIRST_SCORE_NEEDED;
   ui.updateOldScoreTarget(0);
   wave = 1;
-  ui.setNewWaveTimer(10, 0); 
+  ui.setNewWaveTimer(2, 0); 
   map = new Map();
   camera1 = new Camera(0, 0, 3.0f, heightUIOffset, 1);
   camera2 = new Camera(0, 0, 3.0f, heightUIOffset, 2);

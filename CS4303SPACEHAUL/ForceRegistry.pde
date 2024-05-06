@@ -51,11 +51,6 @@ public class ForceRegistry {
 
         while (iterator.hasNext()) {
             ForceRegistration fr = iterator.next();
-            if(fr.body instanceof Player){
-              if(((Player)fr.body).getRespawnTimer() != null){
-                continue;
-              }
-            }
             fr.forceGenerator.updateForce(fr.body);
         }
     }

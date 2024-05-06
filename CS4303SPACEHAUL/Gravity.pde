@@ -19,6 +19,11 @@ public final class Gravity extends ForceGenerator {
         // println("Updating Force");
         //println("Player position: " + body.position);
         //println("Planet position: " + planet.position);
+        if(body instanceof Player){
+          if(((Player)body).getRespawnTimer() != null){
+            return;
+          }
+        }
         PVector direction = PVector.sub(planet.position, body.position);
         float distance = floor(direction.mag());
         direction.normalize();
