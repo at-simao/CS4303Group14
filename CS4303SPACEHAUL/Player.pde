@@ -183,7 +183,8 @@ class Player extends Body {
       CS4303SPACEHAUL.offScreenBuffer.fill(255, 255, 255, floor(float(200*(trailing.length-i))/trailing.length));
       CS4303SPACEHAUL.offScreenBuffer.translate(trailing[i].x, trailing[i].y);
       CS4303SPACEHAUL.offScreenBuffer.rotate(-trailing[i].z+HALF_PI); //.z == orientation
-      CS4303SPACEHAUL.offScreenBuffer.triangle(-radius, -radius, -radius, radius, radius*2, 0);
+      float resultRadius = (CS4303SPACEHAUL.isPaused ? radius*8 : radius); //add visual clarity to pause screen by making player larger
+      CS4303SPACEHAUL.offScreenBuffer.triangle(-resultRadius, -resultRadius, -resultRadius, resultRadius, resultRadius*2, 0);
       CS4303SPACEHAUL.offScreenBuffer.rotate(trailing[i].z-HALF_PI); //.z == orientation
       CS4303SPACEHAUL.offScreenBuffer.translate(-trailing[i].x, -trailing[i].y);
     }
@@ -199,7 +200,8 @@ class Player extends Body {
     }
     
     CS4303SPACEHAUL.offScreenBuffer.rotate(-orientation+HALF_PI);
-    CS4303SPACEHAUL.offScreenBuffer.triangle(-radius, -radius, -radius, radius, radius*2, 0);
+    float resultRadius = (CS4303SPACEHAUL.isPaused ? radius*10 : radius); //add visual clarity to pause screen by making player larger
+    CS4303SPACEHAUL.offScreenBuffer.triangle(-resultRadius, -resultRadius, -resultRadius, resultRadius, resultRadius*2, 0);
     CS4303SPACEHAUL.offScreenBuffer.fill(colour);    
     CS4303SPACEHAUL.offScreenBuffer.rotate((orientation-HALF_PI));
     CS4303SPACEHAUL.offScreenBuffer.translate(-position.x, -position.y);

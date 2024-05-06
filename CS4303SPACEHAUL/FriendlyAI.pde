@@ -39,10 +39,10 @@ class FriendlyAI extends Body { // Similar to Player except follows steering alg
       //follow trail of AI behind player.
       //println("IN WHILE LOOP" + frameCount);
       while(true){
-        //if(otherAI.getAIBehind() != null){
-        //  otherAI = otherAI.getAIBehind();
-        //  continue;
-        //}
+        if(otherAI.getAIBehind() != null){
+          otherAI = otherAI.getAIBehind();
+          continue;
+        }
         //otherwise, it means we reached the end of the trailing line. Add self to end of line.
         otherAI.setAIBehind(this); 
         target = player; 
@@ -176,7 +176,7 @@ class FriendlyAI extends Body { // Similar to Player except follows steering alg
       else {
         tailBehind(); //first establish direction to find player.
       }
-      avoidPlanets(); //then determine net direction that does not fly into a planet.
+      //avoidPlanets(); //then determine net direction that does not fly into a planet.
     }
     //if(velocity.mag() > MAX_SPEED){
     //  //velocity.mult(MAX_SPEED/velocity.mag());

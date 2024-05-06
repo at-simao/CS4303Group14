@@ -57,7 +57,7 @@ class Hazards { //Maintains all hazards on map and handles collision logic for e
       ArrayList<Planet> planets = CS4303SPACEHAUL.map.planets;
       PVector distanceFromMeteor = potentialSpawnPosition.copy();
       for(Planet planet : planets){
-        if(distanceFromMeteor.copy().sub(planet.getPosition()).mag() < 200 + newMeteor.getWidth()*2){ //max radius of planet is 200, 
+        if(distanceFromMeteor.copy().sub(planet.getPosition()).mag() < 200*2*1.5 + newMeteor.getWidth()*2){ //max radius of planet is 200, 
           return; //do not spawn meteor on top of a planet
         }
       }

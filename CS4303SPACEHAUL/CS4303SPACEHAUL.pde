@@ -275,13 +275,10 @@ void draw() {
     rect(width*0.495, heightUIOffset, width*0.01, height);  
     return;
   }
-  if(!isPaused && !gameOver) {
+  if((!isPaused && !gameOver) || pausePressedDrawOnce) {
     physicsAndLogicUpdate(); //Update physics & positions once. Then display twice, once from player 1's perspective, second from player 2's.
     drawUpdate();
     updateMission();
-  }
-  if(pausePressedDrawOnce){
-    drawUpdate();
     pausePressedDrawOnce = false;
   }
   player1.updateRespawnTimer(); //update timer is logic but is an exception. because we must compare the timer every frame, we cannot wait to compare it only after the player unpauses.
