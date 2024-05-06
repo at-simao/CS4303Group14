@@ -18,7 +18,7 @@ class CargoMission extends Mission {
             updateUi(pickupPlanet.getColour());
             cargoToDeliver.add(pickupPlanet);
             if(!pickupPlanets.contains(pickupPlanet)){
-              missionManager.updatePickupZone(pickupPlanet);
+              missionManager.updatePickupZone(pickupPlanet, false);
             }
             return true;
           }
@@ -38,7 +38,7 @@ class CargoMission extends Mission {
     void checkComplete() {
       if(pickupPlanets.isEmpty() && cargoToDeliver.isEmpty()){
         isCompleted = true; 
-        missionManager.updatePickupZone(destinationPlanets.get(0));
+        missionManager.updatePickupZone(destinationPlanets.get(0), true);
         // other stuff
       }
       
@@ -47,15 +47,13 @@ class CargoMission extends Mission {
     @Override
     void update() {
       // Update planet missions
-      if (!player1.hasCargo()) {
-        super.update();
-      }
-      if (player1.hasCargo() && player1.getPosition().dist(destinationPlanets.get(0).getPosition()) < destinationPlanets.get(0).getDiameter()) {
-        promptInteraction(player1);  
-      }
-      if (player2.hasCargo() && player2.getPosition().dist(destinationPlanets.get(0).getPosition()) < destinationPlanets.get(0).getDiameter()) {
-        promptInteraction(player2);
-      }           //<>//
+      super.update();
+      //if (player1.hasCargo() && player1.getPosition().dist(destinationPlanets.get(0).getPosition()) < destinationPlanets.get(0).getDiameter()) {
+      //  promptInteraction(player1);  
+      //} 
+      //if (player2.hasCargo() && player2.getPosition().dist(destinationPlanets.get(0).getPosition()) < destinationPlanets.get(0).getDiameter()) {
+      //  promptInteraction(player2);  
+      //}     //<>//
     }
 
 }

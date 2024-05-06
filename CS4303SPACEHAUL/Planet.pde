@@ -7,7 +7,8 @@ class Planet extends Body {
 
   private float diameter;
   public color colour;
-  private boolean missionPlanet = false;
+  private int missionStartPlanet = 0;
+  private int missionEndPlanet = 0;
 
   public Planet(float radius, float orbit, float angle, float period, color colour) {
       super(new PVector(orbit * cos(angle), orbit * sin(angle)), new PVector(0,0));
@@ -22,8 +23,20 @@ class Planet extends Body {
       this.colour = colour;
   }
 
-  public void setMissionPlanet(boolean newMissionPlanet) {
-    missionPlanet = newMissionPlanet;
+  public void setMissionStartPlanet(boolean newMissionPlanet) {
+    if(newMissionPlanet){
+      missionStartPlanet++;
+    } else {
+      missionStartPlanet--;
+    }
+  }
+  
+  public void setMissionEndPlanet(boolean newMissionPlanet) {
+    if(newMissionPlanet){
+      missionEndPlanet++;
+    } else {
+      missionEndPlanet--;
+    }
   }
 
   public PVector getPosition() {
@@ -72,7 +85,7 @@ class Planet extends Body {
     }
 
 
-    if(missionPlanet) {
+    if(missionStartPlanet > 0 || missionEndPlanet > 0) {
       drawPickup();
     }
     

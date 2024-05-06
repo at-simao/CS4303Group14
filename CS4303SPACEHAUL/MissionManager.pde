@@ -42,13 +42,17 @@ class MissionManager {
 
   }
 
-  public void updatePickupZone(Planet planet) {
+  public void updatePickupZone(Planet planet, boolean startOrEndPoint) {
     for(Mission mission : activeMissions) {
       if(mission.containsPlanet(planet)){
         return;
       }
     }
-    planet.setMissionPlanet(false);
+    if(startOrEndPoint){
+      planet.setMissionEndPlanet(false);
+    } else {
+      planet.setMissionStartPlanet(false);
+    }
   }
 
   // Could be called every game tick or based on certain events

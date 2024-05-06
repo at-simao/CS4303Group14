@@ -26,8 +26,8 @@ UI ui;
 
 ForceRegistry forceRegistry;
 
-Player player1;
-Player player2;
+public static Player player1;
+public static Player player2;
 
 ArrayList<FriendlyAI> aiList = new ArrayList<FriendlyAI>(); //arraylist storing all currently active escort-mission friendly ai.
 ArrayList<EnemyAI> enemyAIList = new ArrayList<EnemyAI>(); //arraylist storing all currently active patroling enemy ai.

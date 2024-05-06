@@ -17,13 +17,13 @@ abstract class Mission {
     uiPlanets = new ArrayList<Integer>();
     uiDPlanets = new ArrayList<Integer>();
     for(Planet planet : destinationPlanets) {
-      planet.setMissionPlanet(true);
+      planet.setMissionEndPlanet(true);
       uiDPlanets.add(planet.getColour());
     }
     this.id = ++lastMissionId;
     type = missionType;
     for(Planet planet : pickupPlanets) {
-      planet.setMissionPlanet(true);
+      planet.setMissionStartPlanet(true);
       uiPlanets.add(planet.getColour());
     }
   }
@@ -62,12 +62,48 @@ abstract class Mission {
      public ArrayList<Integer> getUiDPlanets() {
       return uiDPlanets;
     }
-    public void update(){
+    public void update( ){
       for(Planet planet : pickupPlanets) {
         if (player1.getPosition().dist(planet.getPosition()) < planet.getDiameter()) {
+          if( this instanceof CargoMission){
+            if(player1.hasCargo()){
+              textSize(30);
+              stroke(0,0,0);
+              textAlign(CENTER, CENTER);
+              fill(255);
+              text("Your cargo is full, you cannot pick up more.", width/4, height / 4 * 3.25); // Position above the player 
+              return;
+            }
+          } else {
+            if(player1.getAIs() > ((EscortMission)this).maxFollowingAI) {
+              textSize(30);
+              stroke(0,0,0);
+              textAlign(CENTER, CENTER);
+              fill(255);
+              text("You have reached the limit of escorts. You cannot accept more.", width/4, height / 4 * 3.5); // Position above the player 
+            }
+          }
           promptInteraction(player1);
         }
         if (player2.getPosition().dist(planet.getPosition()) < planet.getDiameter()) {
+          if( this instanceof CargoMission){
+            if(player2.hasCargo()){
+              textSize(30);
+              stroke(0,0,0);
+              textAlign(CENTER, CENTER);
+              fill(255);
+              text("Your cargo is full, you cannot pick up more.", width/4, height / 4 * 3.25); // Position above the player
+              return;
+            }
+          } else {
+            if(player1.getAIs() > ((EscortMission)this).maxFollowingAI) {
+              textSize(30);
+              stroke(0,0,0);
+              textAlign(CENTER, CENTER);
+              fill(255);
+              text("You have reached the limit of escorts. You cannot accept more.", 3*width/4, height / 4 * 3.5); // Position above the player 
+            }
+          }
           promptInteraction(player2);
         }
        }  

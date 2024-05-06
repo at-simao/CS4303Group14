@@ -7,6 +7,7 @@ class EscortMission extends Mission {
   private int numOfAIThatMadeIt = 0;
   private int numOfDeadAI = 0;
   private int maxAI = 0;
+  private int maxFollowingAI = 5;
   
   public EscortMission(ArrayList<Planet> origin, ArrayList<Planet> destination) {
     super(origin,destination, false);
@@ -31,7 +32,7 @@ class EscortMission extends Mission {
       Planet destination = destinationIterator.next();
      // if (!aiSpawned.containsKey(origin) && player.getPosition().dist(origin.getPosition()) < origin.getDiameter()) {
       if (player.getPosition().dist(origin.getPosition()) < origin.getDiameter()) {
-        if(player.getAIs() > 5) {break;}
+        if(player.getAIs() > maxFollowingAI) {break;}
         FriendlyAI newAI = new FriendlyAI(origin.getPosition(), destination);
         aiList.add(newAI);
         newAI.setTarget(player);  // move to constructor
@@ -42,7 +43,7 @@ class EscortMission extends Mission {
         planetIterator.remove(); // Remove planet from pickup list after AI is spawned
         destinationIterator.remove();
         player.increaseAIs();
-        if(!pickupPlanets.contains(origin)) {missionManager.updatePickupZone(origin);}
+        if(!pickupPlanets.contains(origin)) {missionManager.updatePickupZone(origin, false);}
         return true;
       }
     }
