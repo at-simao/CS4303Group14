@@ -12,6 +12,8 @@ static boolean restartAnimationFlag = true;
 static boolean restartAnimationHalfWayFlag = false;
 private final int RESTART_LENGTH = 1500;
 private Timer restartAnimationTimer = new Timer(RESTART_LENGTH, new PVector(0,0), 35);
+private boolean justStarted = true;
+private boolean justStartedTransition = true;
 // UI
 static boolean isPaused = false;
 static boolean pausePressedDrawOnce = false;
@@ -114,6 +116,7 @@ void keyPressed() {
   if(key == 'V' || key == 'v') player2ZoomOut = false;
   if(key == 'E' || key == 'e') missionManager.attemptAction(player1);
   if(key == '1') missionManager.attemptAction(player2);
+  if(keyCode == ENTER || keyCode == RETURN) justStarted = false;
 }
 
 void keyReleased() {
@@ -248,6 +251,12 @@ void drawUpdate(){
 
 
 void draw() {
+  if(justStarted){
+    PImage splashScreen = loadImage("./data/CONTROLS.png");
+    splashScreen.resize(width,height);
+    image(splashScreen, 0, 0);
+    return;
+  }
   if(ui.getTimer().outOfTime()){
     if(score >= scoreNeeded){
       //SUCCESS. New wave.
@@ -267,11 +276,11 @@ void draw() {
     if(restartAnimationHalfWayFlag){
       drawUpdate();
     }
-    ui.draw();
+    if(!justStartedTransition && restartAnimationHalfWayFlag) ui.draw();
     restartAnimation();
     fill(255);
     stroke(0);
-    rect(width*0.495, heightUIOffset, width*0.01, height);  
+    if(!justStartedTransition) rect(width*0.495, heightUIOffset, width*0.01, height);  
     return;
   }
   if((!isPaused && !gameOver) || pausePressedDrawOnce) {
@@ -418,8 +427,8 @@ public void resetFromGameOver(){ //MIGHT NEED TO BE EDITED - some temp code incl
   wave = 1;
   ui.setNewWaveTimer(2, 0); 
   map = new Map();
-  camera1 = new Camera(0, 0, 3.0f, heightUIOffset, 1);
-  camera2 = new Camera(0, 0, 3.0f, heightUIOffset, 2);
+  camera1 = new Camera(650, 0, 3.0f, heightUIOffset, 1);
+  camera2 = new Camera(0, 650, 3.0f, heightUIOffset, 2);
   player1 = new Player(new PVector(650,0), 1);
   player2 = new Player(new PVector(0,650), 2);
   missionManager = new MissionManager();
@@ -453,6 +462,7 @@ private void restartAnimation(){
   circle(width*0.75, height*0.5, lerp(height*1.7,0, abs((restartAnimationTimer.getMaxTime()/2) - restartAnimationTimer.getCurrTime()) / (restartAnimationTimer.getMaxTime()/2)  ));
   if(restartAnimationTimer.getCurrTime() <= restartAnimationTimer.getMaxTime()/2 && !restartAnimationHalfWayFlag){
     restartAnimationHalfWayFlag = true;
+    justStartedTransition = false;
     resetFromGameOver();
   }
   if(restartAnimationTimer.outOfTime()){
