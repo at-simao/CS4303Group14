@@ -49,7 +49,7 @@ static public PGraphics offScreenBuffer; //to refer to the buffer outside of thi
 
 void setup() {
   offScreenBuffer = createGraphics(width, height);
-  frameRate(120);
+  frameRate(60);
   fullScreen();
   noSmooth();
   heightUIOffset = height*0.15;

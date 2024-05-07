@@ -1,7 +1,7 @@
 class UI{
-  private float heightUIOffset = 0;
-  private Timer timer;
-  private float lastTargetScore = 0;
+  private float heightUIOffset = 0; //offset needed from the top of the screen to draw UI element.
+  private Timer timer; //timer for measuring length of wave
+  private float lastTargetScore = 0; 
   private Timer newWaveMessageTimer;
   UI(float heightUIOffset){
     this.heightUIOffset = heightUIOffset;
