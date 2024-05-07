@@ -56,11 +56,9 @@ class EscortMission extends Mission {
   void update() {
     super.update();
     Iterator<FriendlyAI> iterator = escortAIs.iterator();
-    println("update");
     while (iterator.hasNext()) {
       FriendlyAI ai = iterator.next();
       if (ai.arrived()) {
-            println("update2");
         //Update drop off planets
         numOfAIThatMadeIt++;
         //updateUi(getFadedColour(ai.getDestination().getColour()));
@@ -68,7 +66,6 @@ class EscortMission extends Mission {
         continue;
       }
       if(ai.getHealth() <= 0){
-            println("update3");
         iterator.remove(); // Remove AI from the list using the iterator
         aiSpawned.remove(ai.getID());
         aiList.remove(ai);
@@ -76,7 +73,6 @@ class EscortMission extends Mission {
         numOfDeadAI++;
         continue;
       }
-      println("HERE");
       if (aiSpawned.get(ai.getID()) && ai.getPosition().dist(ai.getDestination().getPosition()) < ai.getDestination().getDiameter()) {
         promptInteraction(escortPlayers.get(ai.getID()));
       }

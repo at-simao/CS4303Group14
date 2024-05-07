@@ -83,6 +83,10 @@ class EnemyAI extends Body { //Similar to Player except follows steering algorit
   }
 
   private void fireAtPlayerStateLogic() {
+    if(targetPlayer.getDead()) {
+      changeState(PATROL_STATE);
+      return;
+    }
     PVector toPlayer = PVector.sub(targetPlayer.getPosition(), getPosition());
     float distance = toPlayer.mag();
     toPlayer.normalize();
@@ -211,6 +215,7 @@ class EnemyAI extends Body { //Similar to Player except follows steering algorit
     }
     outerLoop:
     for(int i = 0; i < projectilesFired.size(); i++){
+      if(i > 10) {projectilesFired.remove(i); continue;}
       projectilesFired.get(i).updateTimer();
       if(projectilesFired.get(i).timeToDespawn()){
         projectilesFired.remove(i);
@@ -284,6 +289,9 @@ class EnemyAI extends Body { //Similar to Player except follows steering algorit
   }
 
   public boolean lineOfSight(Player player){
+    if(player.getDead()){
+      return false;
+    }
     PVector lineToPlayer = PVector.sub(player.getPosition(), getPosition());
     float distanceToPlayer = lineToPlayer.mag();
     lineToPlayer.normalize(); // Normalize to get direction vector

@@ -50,6 +50,7 @@ static public PGraphics offScreenBuffer; //to refer to the buffer outside of thi
 //This is used to render to an offscreen image, which we later draw when displaying the split-screen.
 
 void setup() {
+  //surface.setLocation(0, 0); 
   offScreenBuffer = createGraphics(resolutionX, resolutionY);
   frameRate(60);
   fullScreen();
@@ -332,7 +333,10 @@ void updateMission() {
     boolean missionType = (random(0,1) > 0.5);
     int maxPlanets = Math.min(wave, 5);
     ArrayList<Planet> randomPlanets = new ArrayList<Planet>();
-    int numPlanets = (int) random(1, maxPlanets);
+    println(wave);
+    println(maxPlanets + "Tt");
+    int numPlanets = (int) random(1, maxPlanets+0.99);
+    println(numPlanets + "tasd");
     ArrayList<Planet> destinationPlanets = new ArrayList<Planet>();
     
     if(!missionType) {
