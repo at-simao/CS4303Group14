@@ -2,8 +2,8 @@ import java.util.Iterator;
 
 class EscortMission extends Mission {
   private ArrayList<FriendlyAI> escortAIs = new ArrayList<>();
-  private HashMap<FriendlyAI, Boolean> aiSpawned = new HashMap<>();
-  private HashMap<FriendlyAI, Player> escortPlayers = new HashMap<>();
+  private HashMap<Integer, Boolean> aiSpawned = new HashMap<>();
+  private HashMap<Integer, Player> escortPlayers = new HashMap<>();
   private int numOfAIThatMadeIt = 0;
   private int numOfDeadAI = 0;
   private int maxAI = 0;
@@ -20,10 +20,11 @@ class EscortMission extends Mission {
     Iterator<Planet> destinationIterator = destinationPlanets.iterator();
     // Change
     for(FriendlyAI ai: escortAIs) {
-      if(escortPlayers.get(ai) == player && ai.getPosition().dist(ai.getDestination().getPosition()) < ai.getDestination().getDiameter()) {
+      if(escortPlayers.get(ai.getID()) == player && ai.getPosition().dist(ai.getDestination().getPosition()) < ai.getDestination().getDiameter()) {
         ai.seekPlanet();  // Set seek true instead
         player.decreaseAIs();
-        return true; //<>//
+        updateUi(ai.getColour(),false);
+        return true;  //<>//
       }
     }
     
@@ -37,9 +38,10 @@ class EscortMission extends Mission {
         aiList.add(newAI);
         newAI.setTarget(player);  // move to constructor
         escortAIs.add(newAI);
-        aiSpawned.put(newAI, true);
-        escortPlayers.put(newAI, player);
-        updateUi(origin.getColour());
+        aiSpawned.put(newAI.getID(), true);
+        escortPlayers.put(newAI.getID(), player); //<>//
+        updateUi(origin.getColour(), true);
+       // updateUi(origin.getColour());
         planetIterator.remove(); // Remove planet from pickup list after AI is spawned
         destinationIterator.remove();
         player.increaseAIs();
@@ -54,25 +56,29 @@ class EscortMission extends Mission {
   void update() {
     super.update();
     Iterator<FriendlyAI> iterator = escortAIs.iterator();
+    println("update");
     while (iterator.hasNext()) {
       FriendlyAI ai = iterator.next();
       if (ai.arrived()) {
+            println("update2");
         //Update drop off planets
         numOfAIThatMadeIt++;
-        updateUi(getFadedColour(ai.getDestination().getColour()));
+        //updateUi(getFadedColour(ai.getDestination().getColour()));
         completeMission(ai, iterator); // Pass the iterator to the completeMission method
         continue;
       }
       if(ai.getHealth() <= 0){
+            println("update3");
         iterator.remove(); // Remove AI from the list using the iterator
-        aiSpawned.remove(ai);
+        aiSpawned.remove(ai.getID());
         aiList.remove(ai);
-        escortPlayers.remove(ai);
+        escortPlayers.remove(ai.getID());
         numOfDeadAI++;
         continue;
       }
-      if (aiSpawned.get(ai) && ai.getPosition().dist(ai.getDestination().getPosition()) < ai.getDestination().getDiameter()) {
-        promptInteraction(escortPlayers.get(ai));
+      println("HERE");
+      if (aiSpawned.get(ai.getID()) && ai.getPosition().dist(ai.getDestination().getPosition()) < ai.getDestination().getDiameter()) {
+        promptInteraction(escortPlayers.get(ai.getID()));
       }
     }
     if (pickupPlanets.isEmpty() && (numOfDeadAI + numOfAIThatMadeIt) == maxAI) {
@@ -82,9 +88,9 @@ class EscortMission extends Mission {
   }
   private void completeMission(FriendlyAI ai, Iterator<FriendlyAI> iterator) {
     iterator.remove(); // Remove AI from the list using the iterator
-    aiSpawned.remove(ai);
+    aiSpawned.remove(ai.getID());
     aiList.remove(ai);
-    escortPlayers.remove(ai);
+    escortPlayers.remove(ai.getID());
   }
   
   public int getNumThatMadeIt(){

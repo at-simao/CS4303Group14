@@ -74,12 +74,12 @@ void setup() {
     forceRegistry.add(player2, planetGravity);
   }
   
-  // temp first mission
-  ArrayList<Planet> randomPlanets = new ArrayList<Planet>();
-  ArrayList<Planet> randomPlanets2 = new ArrayList<Planet>();
-  randomPlanets.add(map.planets.get(1));
-  randomPlanets2.add(map.planets.get(0));
-  missionManager.addMission(new CargoMission(randomPlanets, randomPlanets2));
+  //// temp first mission
+  //ArrayList<Planet> randomPlanets = new ArrayList<Planet>();
+  //ArrayList<Planet> randomPlanets2 = new ArrayList<Planet>();
+  //randomPlanets.add(map.planets.get(1));
+  //randomPlanets2.add(map.planets.get(0));
+  //missionManager.addMission(new CargoMission(randomPlanets, randomPlanets2));
   
 }
 
@@ -202,7 +202,7 @@ void physicsAndLogicUpdate() {
   }
   for(EnemyAI enemy : enemyAIList){
     enemy.checkPlayer1IsInRange(player1);
-    //enemy.checkPlayer2IsInRange(player2);
+    enemy.checkPlayer2IsInRange(player2);
     enemy.integrate();
   }
 
@@ -294,7 +294,7 @@ void draw() {
       ui.setNewWaveTimer(2,0); //reset timer.
       newWave = true;
       hazards.updateChanceOfMeteors();
-      enemyAIList.add(new EnemyAI(new PVector(0,0)));
+      enemyAIList.add(new EnemyAI(new PVector(2000,2000)));
     } else {
       //GAME OVER.
       wave = 1;
@@ -331,18 +331,19 @@ void updateMission() {
   missionManager.updateMissions();
   if(missionManager.checkForNewMission()) {
     boolean missionType = (random(0,1) > 0.5);
+    int maxPlanets = Math.min(wave, 5);
     ArrayList<Planet> randomPlanets = new ArrayList<Planet>();
-    int numPlanets = (int) random(1, 5);
+    int numPlanets = (int) random(1, maxPlanets);
     ArrayList<Planet> destinationPlanets = new ArrayList<Planet>();
     
     if(!missionType) {
       for(int i = 0; i < numPlanets; i++) {
-        randomPlanets.add(map.planets.get((int)random(0,map.planets.size())));
+        randomPlanets.add(map.planets.get((int)random(1,map.planets.size())));
       }
       for(int i = 0; i < numPlanets; i++) {
-        destinationPlanets.add(map.planets.get((int)random(0,map.planets.size())));
+        destinationPlanets.add(map.planets.get((int)random(1,map.planets.size())));
         while(destinationPlanets.get(i) == randomPlanets.get(i)) {
-          destinationPlanets.set(i, map.planets.get((int) random(0, map.planets.size())));
+          destinationPlanets.set(i, map.planets.get((int) random(1, map.planets.size())));
         }
       }
       
@@ -351,12 +352,11 @@ void updateMission() {
       for(int i = 0; i < numPlanets; i++) {
         randomPlanets.add(map.planets.get((int)random(1,map.planets.size())));
       }
-      destinationPlanets.add(map.planets.get(0));
     }
     
     
     if(missionType) {
-      missionManager.addMission(new CargoMission(randomPlanets, destinationPlanets));
+      missionManager.addMission(new CargoMission(randomPlanets));
     }
     else {
       missionManager.addMission(new EscortMission(randomPlanets, destinationPlanets));
@@ -396,6 +396,7 @@ PImage playerScreenDraw(Player player, Camera cameraForPlayer) {
     
     player.drawImpulseIndicator();
     drawArrows(player.getPosition());
+    lostAIArrows();
     player.drawHealthBar();
   }
   
@@ -403,6 +404,17 @@ PImage playerScreenDraw(Player player, Camera cameraForPlayer) {
   cameraForPlayer.end();
   offScreenBuffer.endDraw();
   return offScreenBuffer.get(); //returns this player's half of the screen as an image.
+}
+
+private void lostAIArrows() {
+  for(int i = 0; i < aiList.size(); i++){
+    if(aiList.get(i).isLost()) {
+      PVector arrowDirection = PVector.sub(aiList.get(i).getPosition(), player1.getPosition());
+      drawArrow(player1.getPosition(), arrowDirection, color(255,2,255));
+      arrowDirection = PVector.sub(aiList.get(i).getPosition(), player2.getPosition());
+      drawArrow(player2.getPosition(), arrowDirection, color(255,2,255));
+    }
+  }
 }
 
 private void friendlyAILogicUpdate(){
@@ -456,6 +468,7 @@ public void resetFromGameOver(){ //MIGHT NEED TO BE EDITED - some temp code incl
   scoreNeeded = FIRST_SCORE_NEEDED;
   ui.updateOldScoreTarget(0);
   wave = 1;
+  aiList.clear();
   ui.setNewWaveTimer(2, 0); 
   map = new Map();
   camera1 = new Camera(650, 0, 3.0f, heightUIOffset, 1);
@@ -474,15 +487,13 @@ public void resetFromGameOver(){ //MIGHT NEED TO BE EDITED - some temp code incl
   
   // temp first mission
   ArrayList<Planet> randomPlanets = new ArrayList<Planet>();
-  ArrayList<Planet> randomPlanets2 = new ArrayList<Planet>();
   randomPlanets.add(map.planets.get(1));
-  randomPlanets2.add(map.planets.get(0));
-  missionManager.addMission(new CargoMission(randomPlanets, randomPlanets2));
+  missionManager.addMission(new CargoMission(randomPlanets));
   stars.clear();
   stars.generate(player1, player2, 1);
   hazards.clear();
   enemyAIList.clear();
-  enemyAIList.add(new EnemyAI(new PVector(650,10)));
+  enemyAIList.add(new EnemyAI(new PVector(2500,2500)));
 }
 
 private void restartAnimation(){

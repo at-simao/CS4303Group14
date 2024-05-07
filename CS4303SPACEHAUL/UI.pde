@@ -42,7 +42,11 @@ class UI{
       x += textWidth(deliverText) + 20;
       for (Integer planet : destinationPlanets) {
         fill(planet);
-        ellipse(x, yStart - textAscent() / 2, heightUIOffset * 0.2, heightUIOffset * 0.2); // 
+        if(planet == color(193,183,183)) {
+          rect(x - heightUIOffset * 0.1, yStart - textAscent() /2 -  (heightUIOffset * 0.1),heightUIOffset * 0.2,heightUIOffset * 0.2);
+        } else {
+         ellipse(x, yStart - textAscent() / 2, heightUIOffset * 0.2, heightUIOffset * 0.2); 
+        }
         x += heightUIOffset * 0.2; // Space between planets
       }
       fill(215, 219, 220);

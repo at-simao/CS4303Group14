@@ -16,7 +16,17 @@ public class DeliveryStation extends Body {
     public PVector getPosition() {
         return position;
     }
-
+    private void drawPickup() {
+      CS4303SPACEHAUL.offScreenBuffer.stroke(255, 255, 255); // Yellow color for visibility
+      CS4303SPACEHAUL.offScreenBuffer.noFill();
+      float radius = 200;  // Slightly larger than the planet's diameter
+      float angleStep = TWO_PI / 60;
+      for (float angle = 0; angle < TWO_PI; angle += angleStep) {
+        float x = cos(angle) * radius;
+        float y = sin(angle) * radius;
+        CS4303SPACEHAUL.offScreenBuffer.point(x, y);
+      }
+    }
     public void integrate() {
         this.angle += TWO_PI / period;
         this.angle %= TWO_PI;
@@ -47,6 +57,7 @@ public class DeliveryStation extends Body {
         CS4303SPACEHAUL.offScreenBuffer.rect(-size, - size * 2 - 5, size * 2, 5); // Left outer panel
         CS4303SPACEHAUL.offScreenBuffer.rect(-size, size * 2 - 10, size * 2, 5);  // Right inner panel
         CS4303SPACEHAUL.offScreenBuffer.rect(-size, - size * 2 + 5, size * 2, 5);  // Left inner panel
+        drawPickup();
         CS4303SPACEHAUL.offScreenBuffer.popMatrix();
     }
 }

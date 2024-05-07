@@ -10,7 +10,8 @@ abstract class Mission {
   private int score;
   private boolean type;
   private int id;
-   
+  protected boolean deliveryStation = false;
+  
   public Mission(ArrayList<Planet> originPlanets, ArrayList<Planet> targetPlanets, boolean missionType) {
     destinationPlanets = targetPlanets;
     pickupPlanets = originPlanets;
@@ -27,16 +28,39 @@ abstract class Mission {
       uiPlanets.add(planet.getColour());
     }
   }
-    
-  protected void updateUi(color colour) {
-    for(int i = 0;i < uiPlanets.size(); i++) {  
-      if(uiPlanets.get(i) == colour) {
-        uiPlanets.set(i, getFadedColour(colour));
-        return;
+   public Mission(ArrayList<Planet> originPlanets, boolean missionType) {
+    destinationPlanets = new ArrayList<Planet>();
+    pickupPlanets = originPlanets;
+    uiPlanets = new ArrayList<Integer>();
+    uiDPlanets = new ArrayList<Integer>();
+    uiDPlanets.add(color(193,183,183));
+    this.id = ++lastMissionId;
+    type = missionType;
+    for(Planet planet : pickupPlanets) {
+      planet.setMissionStartPlanet(true);
+      uiPlanets.add(planet.getColour());
+    }
+    deliveryStation = true;
+  }
+
+    protected void updateUi(color colour, boolean type) {
+    if(type) {
+      for(int i = 0;i < uiPlanets.size(); i++) {  
+        if(uiPlanets.get(i) == colour) {
+          uiPlanets.set(i, getFadedColour(colour));
+          return;
+        }
       }
     }
+    else {
+      for(int i = 0;i < uiDPlanets.size(); i++) {  
+        if(uiDPlanets.get(i) == colour) {
+          uiDPlanets.set(i, getFadedColour(getFadedColour(colour)));
+          return;
+        }
+      }      
+    }
   }
-    
   protected color getFadedColour(color originalColour) {
     float r = red(originalColour) * 0.65;
     float g = green(originalColour) * 0.65;

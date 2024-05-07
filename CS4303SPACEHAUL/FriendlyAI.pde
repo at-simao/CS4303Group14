@@ -1,3 +1,4 @@
+static int gaiID = 0;
 class FriendlyAI extends Body { // Similar to Player except follows steering algorithms for movement. Vulnerable to hazards and follows player once found.
   private final float MAX_SPEED = 30;
 
@@ -7,7 +8,7 @@ class FriendlyAI extends Body { // Similar to Player except follows steering alg
   private final float SLOW_DOWN = 0.7; //drag
   
   private final float radius = 4;
-  
+  private int aiID;
   private color colour;
   
   Player target = null;
@@ -26,12 +27,15 @@ class FriendlyAI extends Body { // Similar to Player except follows steering alg
     super(start, new PVector(0,0), 0.01);
     colour = goal.getColour();
     destination = goal;
+    aiID = ++gaiID;
   }
   
   public Planet getDestination() {
     return destination;
   }
-  
+   public int getID() {
+    return aiID;
+  }
   //Establishes player as target to trail behind.
   public void setTarget(Player player){
     FriendlyAI otherAI = player.getAIBehindPlayer(); 
@@ -56,7 +60,9 @@ class FriendlyAI extends Body { // Similar to Player except follows steering alg
     }
     isLost = false;
   }
-  
+    public boolean isLost() {
+    return isLost;
+  }
   public color getColour() {
     return colour;
   }

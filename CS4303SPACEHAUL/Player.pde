@@ -210,7 +210,7 @@ class Player extends Body {
     CS4303SPACEHAUL.offScreenBuffer.fill(colour);
         // Check if player has cargo and draw outline
     if (hasCargo) {
-        CS4303SPACEHAUL.offScreenBuffer.stroke(cargo.getColour()); // Green outline
+        CS4303SPACEHAUL.offScreenBuffer.stroke(193,183,183); // Green outline
         CS4303SPACEHAUL.offScreenBuffer.strokeWeight(1.5);   // Set the weight of the outline
     } else {
         CS4303SPACEHAUL.offScreenBuffer.noStroke(); // No outline if no cargo
