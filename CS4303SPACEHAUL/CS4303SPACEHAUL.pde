@@ -450,6 +450,8 @@ private void newWaveTarget(){ //multiplier increases by 1000 every wave.
 
 public void resetFromGameOver(){ //MIGHT NEED TO BE EDITED - some temp code included.
   gameOver = false;
+  player1ZoomOut = false;
+  player2ZoomOut = false;
   score = 0;
   scoreNeeded = FIRST_SCORE_NEEDED;
   ui.updateOldScoreTarget(0);
