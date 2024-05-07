@@ -114,14 +114,11 @@ void keyPressed() {
   if(keyCode == DOWN) player2.thrustDown = true;
   if(keyCode == LEFT) player2.thrustRight = true;
   if(keyCode == RIGHT) player2.thrustLeft = true;
-  if(key == 'Z' || key == 'z') player1ZoomOut = true;
-  if(key == 'X' || key == 'x') player1ZoomOut = false;
-  if(key == 'C' || key == 'c') player2ZoomOut = true;
-  if(key == 'V' || key == 'v') player2ZoomOut = false;
-  if(key == 'E' || key == 'e') missionManager.attemptAction(player1);
-  if(key == '1') missionManager.attemptAction(player2);
+  if(key == 'E' || key == 'e') player1ZoomOut = !player1ZoomOut;
+  if(keyCode == SHIFT) player2ZoomOut = !player2ZoomOut;
+  if(key == 'Q' || key == 'q') missionManager.attemptAction(player1);
+  if(keyCode == CONTROL) missionManager.attemptAction(player2);
   if(keyCode == ENTER || keyCode == RETURN) currentSlide = min(++currentSlide, 3);
-  //if(key == 'K' || key == 'k') aiList.get(floor(random(0, aiList.size()))).kill();
 }
 
 void keyReleased() {

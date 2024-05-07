@@ -104,7 +104,7 @@ abstract class Mission {
               stroke(0,0,0);
               textAlign(CENTER, CENTER);
               fill(255);
-              text("You have reached the limit of escorts. You cannot accept more.", width/4, height / 4 * 3.5); // Position above the player 
+              text("You have reached the limit of escorts. You cannot accept more.", 3*width/4, height / 4 * 3.5); // Position above the player 
             }
           }
           promptInteraction(player1);
@@ -146,7 +146,7 @@ abstract class Mission {
       stroke(0,0,0);
       textAlign(CENTER, CENTER);
       fill(255);
-      text("Press "+(player == player1 ? "E" : "1") + " to interact", player == player1 ? width/4 : width/4*3, height / 4 * 3); // Position above the player
+      text("Press "+(player == player1 ? "Q" : "CTRL") + " to interact", player == player1 ? width/4 : width/4*3, height / 4 * 3); // Position above the player
     }
 
     // Handle player interaction
