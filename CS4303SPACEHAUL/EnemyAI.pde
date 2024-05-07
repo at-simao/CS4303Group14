@@ -24,7 +24,7 @@ class EnemyAI extends Body { //Similar to Player except follows steering algorit
   
   private ArrayList<Projectile> projectilesFired = new ArrayList<Projectile>();
   
-  private float visibilityRadius = radius*20;
+  private float visibilityRadius = radius*90;
   
   private Timer cooldownTimer = null;
   
@@ -288,7 +288,7 @@ class EnemyAI extends Body { //Similar to Player except follows steering algorit
     float distanceToPlayer = lineToPlayer.mag();
     lineToPlayer.normalize(); // Normalize to get direction vector
 
-    float maxSightDistance = 1000;
+    float maxSightDistance = visibilityRadius;
     float effectiveDistance = Math.min(distanceToPlayer, maxSightDistance);
 
     for (float d = 0; d < effectiveDistance; d += getRadius() * 0.1) { // Increment by 10% of AI radius
