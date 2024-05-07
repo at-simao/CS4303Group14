@@ -57,7 +57,7 @@ void setup() {
   noSmooth(); //no smooth is used because otherwise it massively slows down performance.
   heightUIOffset = height*0.15;
   ui = new UI(heightUIOffset);
-  ui.setNewWaveTimer(2, 0); //DEMO TIMER, this is meant to be changed when we actually implement a wave system.
+  ui.setNewWaveTimer(2, 0); 
   
   // set up two cameras, one for each player.
   camera1 = new Camera(0, 0, 3.0f, heightUIOffset, 1);
