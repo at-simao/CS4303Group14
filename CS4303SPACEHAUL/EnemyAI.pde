@@ -33,6 +33,7 @@ class EnemyAI extends Body { //Similar to Player except follows steering algorit
     changeState(PATROL_STATE);  //by default enter patrol state from init.
   }
   
+  // change state of enemy ai
   private void changeState(int newState) {
     switch (newState) {
       case INIT_STATE:
@@ -57,54 +58,48 @@ class EnemyAI extends Body { //Similar to Player except follows steering algorit
     currState = newState;
   }
   
+  // get random planet to patrol
   private void determineNewPatrolTarget() {
     int maxSize = CS4303SPACEHAUL.map.planets.size();
     int randomSelect = floor(random(0, maxSize));
     patrollingPlanet = CS4303SPACEHAUL.map.planets.get(randomSelect);
   }
   
+  // moves ai towards patrol planet
   private void patrolStateLogic() {
     if (getPosition().dist(patrollingPlanet.getPosition()) > patrollingPlanet.getDiameter() * 1.5) {
       fleeOrSeek(patrollingPlanet.getPosition().copy(), 1);
       avoidPlanets();
     } 
     else {
-      determineNewPatrolTarget();
+      determineNewPatrolTarget();  // find new target planet
     }
-    //for (Meteor meteor : hazards.getMeteors()) {
-    //  if (getPosition().dist(meteor.getPosition()) < 500) {
-    //    if(cooldownTimer == null) {
-    //      PVector velocityOfProjectile =  position.copy().sub(meteor.getPosition()).mult(-1).normalize();
-    //      projectilesFired.add(new Projectile(position.copy(), velocityOfProjectile.mult(PROJECTILE_PROPULSION).copy(), 5, 10));
-    //      cooldownTimer = new Timer(2000, null, 0);
-    //    }
-    //  }
-    //}
   }
 
+  // fire at and move towards player
   private void fireAtPlayerStateLogic() {
-    if(targetPlayer.getDead()) {
+    if(targetPlayer.getDead()) {  // if target is dead then patrol
       changeState(PATROL_STATE);
       return;
     }
     PVector toPlayer = PVector.sub(targetPlayer.getPosition(), getPosition());
     float distance = toPlayer.mag();
     toPlayer.normalize();
-    if (distance < 150) {
+    if (distance < 150) {  // slow down as approaching closer to player
       velocity.mult(SLOW_DOWN);
     }
-      if (distance < 50) {
+      if (distance < 50) {  // start to orbit around player
         PVector orbitDirection = new PVector(-toPlayer.y, toPlayer.x);
         velocity = orbitDirection;
         if (distance > 30) {
           fleeOrSeek(targetPlayer.getPosition(), 1);
-          } else if (distance < 20) {
+          } else if (distance < 20) {  // dont get too close
               fleeOrSeek(targetPlayer.getPosition(), -1);
          }
       } else {
           fleeOrSeek(targetPlayer.getPosition(), 1);
       }
-      if (cooldownTimer == null) {
+      if (cooldownTimer == null) {  // create new projectile to fire at player
         PVector velocityOfProjectile = position.copy().sub(targetPlayer.getPosition()).mult(-1).normalize();
         projectilesFired.add(new Projectile(position.copy(), velocityOfProjectile.mult(PROJECTILE_PROPULSION).copy(), 5, 10));
         cooldownTimer = new Timer(1600, null, 0);
@@ -136,7 +131,7 @@ class EnemyAI extends Body { //Similar to Player except follows steering algorit
 
   
   public void integrate() {
-    for(Projectile projectile : projectilesFired){
+    for(Projectile projectile : projectilesFired){  // update projectiles
       projectile.integrate();
     }
     switch (currState) {
@@ -158,6 +153,7 @@ class EnemyAI extends Body { //Similar to Player except follows steering algorit
     updatePosition();
   }
   
+  // update orientation towards target
   private void updateOrientation() {
     if (velocity.mag() != 0) {
       float targetOrientation = atan2(velocity.x, velocity.y);
@@ -177,10 +173,11 @@ class EnemyAI extends Body { //Similar to Player except follows steering algorit
     }
   }
   
+  // update pos of ai
   private void updatePosition() {
     position.y += velocity.y;
     position.x += velocity.x;
-    velocity.mult(SLOW_DOWN);
+    velocity.mult(SLOW_DOWN);  
   }
 
  public void draw() {
@@ -196,7 +193,6 @@ class EnemyAI extends Body { //Similar to Player except follows steering algorit
     }
   }
   
-
 
   public float getRadius(){
     return radius;
@@ -304,12 +300,11 @@ class EnemyAI extends Body { //Similar to Player except follows steering algorit
         for (Planet planet : CS4303SPACEHAUL.map.planets) {
             float distanceToPlanet = PVector.dist(checkPoint, planet.getPosition());
             if (distanceToPlanet < planet.getDiameter() / 2) {
-                //System.out.println("Blocked by planet" );
                 return false; // Planet is blocking the line of sight
             }
         }
     }
-    if (maxSightDistance >= distanceToPlayer) {
+    if (maxSightDistance >= distanceToPlayer) {  // if can see player update last seen location
       lastKnownPlayerPosition = player.getPosition().copy();
       return true;
     }

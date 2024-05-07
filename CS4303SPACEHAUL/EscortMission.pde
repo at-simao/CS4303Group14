@@ -15,11 +15,12 @@ class EscortMission extends Mission {
     maxAI = destination.size();
   }
     
+    // attempt interaction with player
   public boolean attemptAction(Player player) { //<>//
     Iterator<Planet> planetIterator = pickupPlanets.iterator();
     Iterator<Planet> destinationIterator = destinationPlanets.iterator();
-    // Change
-    for(FriendlyAI ai: escortAIs) {
+    // Change  
+    for(FriendlyAI ai: escortAIs) {  // attempt AI drop off first
       if(escortPlayers.get(ai.getID()) == player && ai.getPosition().dist(ai.getDestination().getPosition()) < ai.getDestination().getDiameter()) {
         ai.seekPlanet();  // Set seek true instead
         player.decreaseAIs();
@@ -31,17 +32,15 @@ class EscortMission extends Mission {
     while (planetIterator.hasNext()) {
       Planet origin = planetIterator.next();
       Planet destination = destinationIterator.next();
-     // if (!aiSpawned.containsKey(origin) && player.getPosition().dist(origin.getPosition()) < origin.getDiameter()) {
       if (player.getPosition().dist(origin.getPosition()) < origin.getDiameter()) {
-        if(player.getAIs() > maxFollowingAI) {break;}
+        if(player.getAIs() > maxFollowingAI) {break;}  // limit following ai total
         FriendlyAI newAI = new FriendlyAI(origin.getPosition(), destination);
         aiList.add(newAI);
-        newAI.setTarget(player);  // move to constructor
+        newAI.setTarget(player);  // 
         escortAIs.add(newAI);
         aiSpawned.put(newAI.getID(), true);
         escortPlayers.put(newAI.getID(), player); //<>//
         updateUi(origin.getColour(), true);
-       // updateUi(origin.getColour());
         planetIterator.remove(); // Remove planet from pickup list after AI is spawned
         destinationIterator.remove();
         player.increaseAIs();
@@ -61,7 +60,6 @@ class EscortMission extends Mission {
       if (ai.arrived()) {
         //Update drop off planets
         numOfAIThatMadeIt++;
-        //updateUi(getFadedColour(ai.getDestination().getColour()));
         completeMission(ai, iterator); // Pass the iterator to the completeMission method
         continue;
       }
@@ -79,7 +77,6 @@ class EscortMission extends Mission {
     }
     if (pickupPlanets.isEmpty() && (numOfDeadAI + numOfAIThatMadeIt) == maxAI) {
       isCompleted = true; // Ensure all conditions are met before marking as complete
-     // missionManager.updatePickupZone(destinationPlanets);
     }
   }
   private void completeMission(FriendlyAI ai, Iterator<FriendlyAI> iterator) {
