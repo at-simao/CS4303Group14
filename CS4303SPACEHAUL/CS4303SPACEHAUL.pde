@@ -148,11 +148,11 @@ void drawArrows(PVector playerPosition) {
   // drawArrow(playerPosition, arrowDirection, map.star.colour);
   for (Planet planet : map.planets) {
     PVector arrowDirection = PVector.sub(planet.getPosition(), playerPosition);
-    drawArrow(playerPosition, arrowDirection, planet.colour);
+    drawArrow(playerPosition, arrowDirection, planet.colour, false);
   }
 }
 
-void drawArrow(PVector playerPosition, PVector direction, color colour) {
+void drawArrow(PVector playerPosition, PVector direction, color colour, boolean isLost) {
   float arrowLength = 10; // Length of the arrow from its start point
   float arrowHeadSize = 5; // Size of the arrow head sides
   float offsetRadius = 30; // Distance from player position to start the arrow
@@ -170,10 +170,17 @@ void drawArrow(PVector playerPosition, PVector direction, color colour) {
   // Draw the arrow shaft (optional, if you want a line leading to the head)
   offScreenBuffer.stroke(colour); // Red for visibility
   offScreenBuffer.strokeWeight(2);
+  
+  if(isLost){
+    offScreenBuffer.fill(colour); // Red for visibility
+    offScreenBuffer.triangle(arrowLength, 0, arrowHeadSize, -arrowHeadSize, arrowHeadSize, arrowHeadSize);
+  } else {
+     // Draw the arrowhead
+    offScreenBuffer.line(arrowLength, 0, arrowHeadSize, -arrowHeadSize);
+    offScreenBuffer.line(arrowLength, 0, arrowHeadSize, arrowHeadSize);
+  }
 
-  // Draw the arrowhead
-  offScreenBuffer.line(arrowLength, 0, arrowHeadSize, -arrowHeadSize);
-  offScreenBuffer.line(arrowLength, 0, arrowHeadSize, arrowHeadSize);
+ 
   offScreenBuffer.popMatrix();
 }
 
@@ -413,9 +420,9 @@ private void lostAIArrows() {
   for(int i = 0; i < aiList.size(); i++){
     if(aiList.get(i).isLost()) {
       PVector arrowDirection = PVector.sub(aiList.get(i).getPosition(), player1.getPosition());
-      drawArrow(player1.getPosition(), arrowDirection, color(255,2,255));
+      drawArrow(player1.getPosition(), arrowDirection, color(255,2,255), true);
       arrowDirection = PVector.sub(aiList.get(i).getPosition(), player2.getPosition());
-      drawArrow(player2.getPosition(), arrowDirection, color(255,2,255));
+      drawArrow(player2.getPosition(), arrowDirection, color(255,2,255), true);
     }
   }
 }
