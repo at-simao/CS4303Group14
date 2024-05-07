@@ -39,6 +39,17 @@ class FriendlyAI extends Body { // Similar to Player except follows steering alg
   //Establishes player as target to trail behind.
   public void setTarget(Player player){
     FriendlyAI otherAI = player.getAIBehindPlayer(); 
+    if(isLost){
+      isLost = false;
+      target = player;
+      target.setAIFollowing(this);
+      otherAI = aiBehind;
+      while(otherAI != null){
+        otherAI.changeTargetOnly(target);
+        otherAI = otherAI.getAIBehind();
+      }
+      return;
+    }
     if(otherAI != null){
       //follow trail of AI behind player.
       //println("IN WHILE LOOP" + frameCount);
@@ -184,22 +195,24 @@ class FriendlyAI extends Body { // Similar to Player except follows steering alg
     else {
       if(position.dist(player1.getPosition()) < 500 && isLost) {
         setTarget(player1); ///////////////////////
-        isLost = false;
+        //isLost = false;
       }
       if(position.dist(player2.getPosition()) < 500 && isLost) {
         setTarget(player2);
-        isLost = false;
+        //isLost = false;
       }
       if(position.dist(target.getPosition()) > 500) {
-        if(!isLost) {
+        if(!isLost && aiInFront == null) {
           isLost = true;
-          loseRecursively(this);
-          if(target.getAIBehindPlayer() == this){
-            target.setAIFollowing(null);
-          }
+          //loseRecursively(this);
+          //if(target.getAIBehindPlayer() == this){
+          //  target.setAIFollowing(null);
+          //}
           wanderTarget = target.getPosition().copy();
+          wander();
+        } else if(isLost){
+          wander();
         }
-        wander();
       }
       else {
         tailBehind(); //first establish direction to find player.
@@ -327,5 +340,9 @@ class FriendlyAI extends Body { // Similar to Player except follows steering alg
   
   public void kill(){
     health = 0;
+  }
+  
+  public void changeTargetOnly(Player player){
+    target = player;
   }
 }
