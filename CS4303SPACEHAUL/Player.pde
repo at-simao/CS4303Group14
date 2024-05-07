@@ -81,6 +81,10 @@ class Player extends Body {
     }
   }
   
+  public boolean getDead() {
+    return respawnTimer != null;
+  }
+  
   public void integrate() {
     if(respawnTimer != null){
       for(Planet planet : CS4303SPACEHAUL.map.planets){
