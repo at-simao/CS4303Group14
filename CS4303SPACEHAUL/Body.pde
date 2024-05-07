@@ -1,4 +1,4 @@
-class Body { //from: https://studres.cs.st-andrews.ac.uk/CS4303/Lectures/L5/GravitySketch/Particle.pde
+class Body { //adapted from: https://studres.cs.st-andrews.ac.uk/CS4303/Lectures/L5/GravitySketch/Particle.pde
    
   // Vectors to hold pos, vel
   public PVector position, velocity;

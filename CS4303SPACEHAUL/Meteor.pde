@@ -5,7 +5,7 @@ class Meteor extends Body{ //small bodies that attract one another and collide w
   private float angularMomentum = 0;
   private float ANGULAR_DRAG = 0.97;
   private boolean toRemove = false;
-  private float minimumDistanceForGravity = 200;
+  //private float minimumDistanceForGravity = 200;
   private boolean isDestroyed = false;
   
   

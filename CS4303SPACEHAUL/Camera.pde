@@ -2,8 +2,8 @@ class Camera {
   private PVector firstTranslate; //translation to middle of respective player's screen (centre at 1/4 width for P1 and 3/4 width for P2)
   private PVector secondTranslate; //translation to middle of respective player's sprite
   private float zoom = 5.0f; //zoom
-  private float zoomX = 5.0f; //zoom
-  private float zoomY = 5.0f; //zoom
+  //private float zoomX = 5.0f; //zoom
+  //private float zoomY = 5.0f; //zoom
   private PVector position = new PVector(0,0);
   float heightUIOffset;
   

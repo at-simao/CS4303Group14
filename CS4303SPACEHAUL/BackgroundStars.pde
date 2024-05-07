@@ -37,7 +37,6 @@ class BackgroundStars { //Maintains background stars of level.
           }
         }
       }
-      println("ESCAPE");
       return;
     }
     PVector potentialSpawnPosition = null;

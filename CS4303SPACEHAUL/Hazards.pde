@@ -220,7 +220,7 @@ class Hazards { //Maintains all hazards on map and handles collision logic for e
     }
   }
   
-  private PVector returnReflectionVector(PVector incidence, PVector normal){
+  private PVector returnReflectionVector(PVector incidence, PVector normal){ //r = 2*(n dot l)*l - n
     float angleOfIncidence = normal.dot(incidence);
     return normal.mult(2*angleOfIncidence).sub(incidence).normalize().copy();
   }
