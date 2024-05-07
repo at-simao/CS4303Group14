@@ -4,7 +4,7 @@
  */
 public final class Gravity extends ForceGenerator {
     private static final float METEOR_MAX_DIST = 100;
-    private static final float METEOR_MIN_DIST = 12.5;
+    private static final float METEOR_MIN_DIST = 15;
     private static final float G = 0.1;
     public Body gravitationalBody;
     
