@@ -63,10 +63,10 @@ class Camera {
     return zoom;
   }
   
-  public void setZoom(float x, float y){ //used when scaling is not uniform between y and x.
-    zoomX = x;
-    zoomY = y;
-  }
+  //public void setZoom(float x, float y){ //used when scaling is not uniform between y and x.
+  //  zoomX = x;
+  //  zoomY = y;
+  //}
   
   public void setZoom(float x){
     zoom = x;
