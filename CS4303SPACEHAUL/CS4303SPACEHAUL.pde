@@ -54,7 +54,7 @@ void setup() {
   offScreenBuffer = createGraphics(resolutionX, resolutionY);
   frameRate(60);
   fullScreen();
-  noSmooth();
+  noSmooth(); //no smooth is used because otherwise it massively slows down performance.
   heightUIOffset = height*0.15;
   ui = new UI(heightUIOffset);
   ui.setNewWaveTimer(2, 0); //DEMO TIMER, this is meant to be changed when we actually implement a wave system.
@@ -64,7 +64,6 @@ void setup() {
   camera2 = new Camera(0, 0, 3.0f, heightUIOffset, 2);
   player1 = new Player(new PVector(650,0), 1);
   player2 = new Player(new PVector(0,650), 2);
-  //TO BE REMOVED
   map = new Map();
   missionManager = new MissionManager();
   int numPlanets = (int) random(3, 7);
@@ -131,16 +130,6 @@ void keyReleased() {
   if(keyCode == DOWN) player2.thrustDown = false;
   if(keyCode == LEFT) player2.thrustRight = false;
   if(keyCode == RIGHT) player2.thrustLeft = false;
-}
-
-void drawGrid() { //temporary, can be removed once we have an actual map.
-  int STRIDE = 32;
-  for (int c = 0; c < width/STRIDE; c++) {
-    for (int r = 0; r < height/STRIDE; r++) {
-      offScreenBuffer.fill(255);
-      offScreenBuffer.text("(" + c + ", " + r + ")", c * STRIDE, r * STRIDE);
-    }
-  }
 }
 
 void drawArrows(PVector playerPosition) {
@@ -470,7 +459,7 @@ private void newWaveTarget(){ //multiplier increases by 1000 every wave.
   scoreNeeded += 1000;
 }
 
-public void resetFromGameOver(){ //MIGHT NEED TO BE EDITED - some temp code included.
+public void resetFromGameOver(){
   gameOver = false;
   player1ZoomOut = false;
   player2ZoomOut = false;
