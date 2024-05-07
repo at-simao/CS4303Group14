@@ -1,6 +1,8 @@
 //DEBUG VARIABLES
 boolean player1ZoomOut = false;
 boolean player2ZoomOut = false;
+int resolutionX = 1900; //used for rendeing to PGraphics, which we later resize if the screen resolution is different.
+int resolutionY = 1200; //used for rendeing to PGraphics, which we later resize if the screen resolution is different.
 final float ZOOM_OUT_VALUE = 0.1;
 // WAVE & SCORE & GAME OVER
 static int wave = 1;
@@ -48,7 +50,7 @@ static public PGraphics offScreenBuffer; //to refer to the buffer outside of thi
 //This is used to render to an offscreen image, which we later draw when displaying the split-screen.
 
 void setup() {
-  offScreenBuffer = createGraphics(width, height);
+  offScreenBuffer = createGraphics(resolutionX, resolutionY);
   frameRate(60);
   fullScreen();
   noSmooth();
@@ -257,14 +259,14 @@ void drawUpdate(){
     translate(0, heightUIOffset);
     imageMode(CORNER);
     player1Screen.loadPixels();
-    for (int i = 0; i < width*height; i++) {
-      if(i % width == 0){
-        i += width/2; //right-half of screen
+    for (int i = 0; i < resolutionX*resolutionY; i++) {
+      if(i % resolutionX == 0){
+        i += resolutionX/2; //right-half of screen
       }
-      player1Screen.pixels[i] = player2Screen.pixels[i - width/2]; //left-half is player 1's screen, right-half is player 2's.
+      player1Screen.pixels[i] = player2Screen.pixels[i - resolutionX/2]; //left-half is player 1's screen, right-half is player 2's.
     }
     player1Screen.updatePixels();
-    image(player1Screen, 0, 0);
+    image(player1Screen, 0, 0, width, height); //resizes screen if the resolution is different from game-logic resolution.
     imageMode(CENTER);
     noStroke();
     translate(0, -heightUIOffset);
