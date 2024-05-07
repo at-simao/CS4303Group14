@@ -1,8 +1,8 @@
 //DEBUG VARIABLES
 boolean player1ZoomOut = false;
 boolean player2ZoomOut = false;
-int resolutionX = 1900;
-int resolutionY = 1200;
+int resolutionX = 1900; //used for rendeing to PGraphics, which we later resize if the screen resolution is different.
+int resolutionY = 1200; //used for rendeing to PGraphics, which we later resize if the screen resolution is different.
 final float ZOOM_OUT_VALUE = 0.1;
 // WAVE & SCORE & GAME OVER
 static int wave = 1;
@@ -266,7 +266,7 @@ void drawUpdate(){
       player1Screen.pixels[i] = player2Screen.pixels[i - resolutionX/2]; //left-half is player 1's screen, right-half is player 2's.
     }
     player1Screen.updatePixels();
-    image(player1Screen, 0, 0, width, height);
+    image(player1Screen, 0, 0, width, height); //resizes screen if the resolution is different from game-logic resolution.
     imageMode(CENTER);
     noStroke();
     translate(0, -heightUIOffset);
