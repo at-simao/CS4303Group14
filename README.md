@@ -7,4 +7,4 @@
 - You and your partner move around the solar system trying to fulfill as many missions as possible (points awarded proportional to difficulty and degree of success). You cannot do everything by yourself, so communication and cooperation is key!
 - Hazards: meteors move and collide with eachother, and can hurt you. Enemy ships patrol the solar system and will target you and any friendly AI following you. If you die, you will need to wait to be respawned.
 # Missions
-- The key gola is to complete as many missions as possible. The two mission types are Cargo and Escort. Cargo involves taking a resource from one planet to another. Escort involves taking as many friendly AI with you to another/other planet/planets. 
+- The key goal is to complete as many missions as possible. The two mission types are Cargo and Escort. Cargo involves taking a resource from one planet to another. Escort involves taking as many friendly AI with you to another/other planet/planets. 
